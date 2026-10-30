@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-yt-x is a terminal-based YouTube browser and downloader written in pure Bash (~2,500 lines). It provides an interactive TUI for browsing YouTube, searching, streaming videos, downloading content, and managing playlists using fzf/rofi, yt-dlp, and mpv/vlc.
+yt-x is a terminal-based YouTube browser and downloader written in pure Bash (~4,500 lines). It provides an interactive TUI for browsing YouTube, searching, streaming videos, downloading content, and managing playlists using fzf/rofi, yt-dlp, and mpv/vlc.
 
 ## Build & Run Commands
 
@@ -43,11 +43,13 @@ YT_X_DEBUG=1 ./yt-x
 
 **Single-file Bash script** (`yt-x`) containing all functionality:
 
-1. **Initialization (lines 1-39):** Platform detection, directory setup
-2. **Configuration (lines 40-287):** `load_config()`, `build_ytdlp_opts()`
-3. **Utilities (lines 288-930):** UI functions (`launcher()`, `launcher_with_preview()`), preview generation, notifications, yt-dlp wrapper
-4. **Core Logic (lines 931-1460):** `playlist_explorer()`, `channels_explorer()`, `playlists_explorer()`
-5. **Main Menu & CLI (lines 1539+):** `main()` loop, argument parsing
+1. **Initialization (lines 1-49):** Platform detection, directory setup
+2. **Configuration (lines 50-490):** `print_config()`, `load_config()`, `build_ytdlp_opts()`
+3. **Utilities (lines 491-2787):** feed cache and live updater, update check, UI functions (`launcher()`, `launcher_with_preview()`), preview generation, themes, yt-dlp wrapper, dependency checks/installer
+4. **Core Logic (lines 2788-3634):** `playlist_explorer()`, `playlists_explorer()`, `channels_explorer()`
+5. **Main Menu & CLI (lines 3635+):** `main()` loop, `usage()`, argument parsing, shell completions
+
+Line numbers drift; grep for `^name() {` to find a function.
 
 **Extension System:** Extensions in `~/.config/yt-x/extensions/` are sourced into the script and can override `main()`. Examples in `extensions/` directory.
 
@@ -74,7 +76,7 @@ CLI_CACHE_DIR="${XDG_CACHE_HOME:-"$HOME"/.cache}/$CLI_NAME"
 
 yt-x supports a comprehensive theming system. Themes define terminal colors, fzf styling, and icons.
 
-**Built-in themes:** `everforest-dark-hard` (default), `tokyo-night`, `catppuccin-mocha`, `gruvbox-dark`, `dracula`
+**Built-in themes:** 21 in `themes/` (default `everforest-dark-hard`); run `./yt-x --list-themes` for the full list
 
 **Theme locations:**
 - User themes: `~/.config/yt-x/themes/`
