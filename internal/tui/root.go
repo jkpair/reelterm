@@ -206,7 +206,7 @@ func (r *Root) forceExit() tea.Cmd {
 }
 
 func (r *Root) headerView() string {
-	if r.h < 34 || r.w < 44 || r.env.Header == "" {
+	if r.h < 34 || r.w < 62 || r.env.Header == "" {
 		title := r.env.S.Title.Render(" " + r.env.Paths.Name)
 		return title + r.env.S.Dim.Render("  Kurl_Marx Edition") + "\n"
 	}
