@@ -1,0 +1,95 @@
+# yt-x Theme: Gruvbox Light
+# A retro groove color scheme - light variant
+# https://github.com/morhetz/gruvbox
+
+# Theme metadata
+THEME_NAME="Gruvbox Light"
+THEME_AUTHOR="morhetz (Gruvbox), yt-x adaptation"
+THEME_VERSION="1.0"
+
+# =============================================================================
+# TERMINAL COLORS (256-color palette)
+# =============================================================================
+
+# Primary colors
+COLOR_RED='\033[38;5;124m'        # #9d0006
+COLOR_GREEN='\033[38;5;100m'      # #79740e
+COLOR_YELLOW='\033[38;5;136m'     # #b57614
+COLOR_BLUE='\033[38;5;66m'        # #076678
+COLOR_MAGENTA='\033[38;5;132m'    # #8f3f71
+COLOR_CYAN='\033[38;5;72m'        # #427b58
+COLOR_ORANGE='\033[38;5;130m'     # #af3a03
+
+# Neutral colors
+COLOR_GRAY='\033[38;5;144m'       # #bdae93
+COLOR_WHITE='\033[38;5;239m'      # #3c3836 (fg)
+COLOR_DIM='\033[38;5;248m'
+
+# Text styles
+STYLE_BOLD='\033[1m'
+STYLE_DIM='\033[2m'
+STYLE_ITALIC='\033[3m'
+STYLE_RESET='\033[0m'
+
+# =============================================================================
+# FZF THEME
+# =============================================================================
+
+FZF_COLORS='
+  --color=fg:#3c3836,fg+:#3c3836,bg:#fbf1c7,bg+:#ebdbb2
+  --color=hl:#076678,hl+:#076678,info:#79740e,marker:#79740e
+  --color=prompt:#9d0006,spinner:#8f3f71,pointer:#8f3f71,header:#076678
+  --color=border:#bdae93,label:#3c3836,query:#3c3836
+  --color=gutter:#fbf1c7,scrollbar:#bdae93
+'
+
+FZF_STYLE='
+  --border="rounded" --border-label="" --preview-window="border-rounded"
+  --prompt="  " --marker=" " --pointer="▌"
+  --separator="─" --scrollbar="▐"  --padding="0,1" --margin="0"
+'
+
+# =============================================================================
+# UI ELEMENTS
+# =============================================================================
+
+BOX_TOP_LEFT="╭"
+BOX_TOP_RIGHT="╮"
+BOX_BOTTOM_LEFT="╰"
+BOX_BOTTOM_RIGHT="╯"
+BOX_HORIZONTAL="─"
+BOX_VERTICAL="│"
+BOX_SEPARATOR="┈"
+
+# =============================================================================
+# GUM THEME (hex colors for charmbracelet/gum)
+# =============================================================================
+GUM_CONFIRM_PROMPT_FOREGROUND="#3c3836"
+GUM_CONFIRM_SELECTED_BACKGROUND="#79740e"
+GUM_CONFIRM_SELECTED_FOREGROUND="#fbf1c7"
+GUM_CONFIRM_UNSELECTED_BACKGROUND="#ebdbb2"
+GUM_CONFIRM_UNSELECTED_FOREGROUND="#3c3836"
+GUM_INPUT_CURSOR_FOREGROUND="#79740e"
+GUM_INPUT_PROMPT_FOREGROUND="#427b58"
+GUM_INPUT_HEADER_FOREGROUND="#076678"
+GUM_SPIN_SPINNER_FOREGROUND="#427b58"
+
+# Icons (Nerd Font required)
+ICON_HOME="󰋜"
+ICON_SEARCH=""
+ICON_PLAYLIST="󰐑"
+ICON_WATCH_LATER=""
+ICON_LIKED=""
+ICON_SAVED=""
+ICON_HISTORY=""
+ICON_RECENT=""
+ICON_SUBSCRIPTION="󰵀"
+ICON_CHANNEL="󰑈"
+ICON_CUSTOM=""
+ICON_CLIPS=""
+ICON_SETTINGS=""
+ICON_CONFIG=""
+ICON_EXIT="󰈆"
+ICON_PLAY=""
+ICON_DOWNLOAD=""
+ICON_AUDIO=""

@@ -1,0 +1,95 @@
+# yt-x Theme: Solarized Dark
+# Precision colors for machines and people
+# https://ethanschoonover.com/solarized/
+
+# Theme metadata
+THEME_NAME="Solarized Dark"
+THEME_AUTHOR="Ethan Schoonover, yt-x adaptation"
+THEME_VERSION="1.0"
+
+# =============================================================================
+# TERMINAL COLORS (256-color palette)
+# =============================================================================
+
+# Primary colors
+COLOR_RED='\033[38;5;160m'        # #dc322f
+COLOR_GREEN='\033[38;5;64m'       # #859900
+COLOR_YELLOW='\033[38;5;136m'     # #b58900
+COLOR_BLUE='\033[38;5;33m'        # #268bd2
+COLOR_MAGENTA='\033[38;5;125m'    # #d33682
+COLOR_CYAN='\033[38;5;37m'        # #2aa198
+COLOR_ORANGE='\033[38;5;166m'     # #cb4b16
+
+# Neutral colors
+COLOR_GRAY='\033[38;5;240m'       # #586e75 (base01)
+COLOR_WHITE='\033[38;5;246m'      # #839496 (base0)
+COLOR_DIM='\033[38;5;241m'
+
+# Text styles
+STYLE_BOLD='\033[1m'
+STYLE_DIM='\033[2m'
+STYLE_ITALIC='\033[3m'
+STYLE_RESET='\033[0m'
+
+# =============================================================================
+# FZF THEME
+# =============================================================================
+
+FZF_COLORS='
+  --color=fg:#839496,fg+:#93a1a1,bg:#002b36,bg+:#073642
+  --color=hl:#2aa198,hl+:#2aa198,info:#859900,marker:#859900
+  --color=prompt:#dc322f,spinner:#d33682,pointer:#d33682,header:#268bd2
+  --color=border:#586e75,label:#839496,query:#93a1a1
+  --color=gutter:#002b36,scrollbar:#586e75
+'
+
+FZF_STYLE='
+  --border="rounded" --border-label="" --preview-window="border-rounded"
+  --prompt="  " --marker=" " --pointer="▌"
+  --separator="─" --scrollbar="▐"  --padding="0,1" --margin="0"
+'
+
+# =============================================================================
+# UI ELEMENTS
+# =============================================================================
+
+BOX_TOP_LEFT="╭"
+BOX_TOP_RIGHT="╮"
+BOX_BOTTOM_LEFT="╰"
+BOX_BOTTOM_RIGHT="╯"
+BOX_HORIZONTAL="─"
+BOX_VERTICAL="│"
+BOX_SEPARATOR="┈"
+
+# =============================================================================
+# GUM THEME (hex colors for charmbracelet/gum)
+# =============================================================================
+GUM_CONFIRM_PROMPT_FOREGROUND="#839496"
+GUM_CONFIRM_SELECTED_BACKGROUND="#859900"
+GUM_CONFIRM_SELECTED_FOREGROUND="#002b36"
+GUM_CONFIRM_UNSELECTED_BACKGROUND="#073642"
+GUM_CONFIRM_UNSELECTED_FOREGROUND="#839496"
+GUM_INPUT_CURSOR_FOREGROUND="#859900"
+GUM_INPUT_PROMPT_FOREGROUND="#2aa198"
+GUM_INPUT_HEADER_FOREGROUND="#268bd2"
+GUM_SPIN_SPINNER_FOREGROUND="#2aa198"
+
+# Icons (Nerd Font required)
+ICON_HOME="󰋜"
+ICON_SEARCH=""
+ICON_PLAYLIST="󰐑"
+ICON_WATCH_LATER=""
+ICON_LIKED=""
+ICON_SAVED=""
+ICON_HISTORY=""
+ICON_RECENT=""
+ICON_SUBSCRIPTION="󰵀"
+ICON_CHANNEL="󰑈"
+ICON_CUSTOM=""
+ICON_CLIPS=""
+ICON_SETTINGS=""
+ICON_CONFIG=""
+ICON_EXIT="󰈆"
+ICON_PLAY=""
+ICON_DOWNLOAD=""
+ICON_AUDIO=""

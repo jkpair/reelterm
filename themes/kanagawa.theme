@@ -1,0 +1,95 @@
+# yt-x Theme: Kanagawa
+# A dark color scheme inspired by the famous painting by Katsushika Hokusai
+# https://github.com/rebelot/kanagawa.nvim
+
+# Theme metadata
+THEME_NAME="Kanagawa"
+THEME_AUTHOR="rebelot, yt-x adaptation"
+THEME_VERSION="1.0"
+
+# =============================================================================
+# TERMINAL COLORS (256-color palette)
+# =============================================================================
+
+# Primary colors
+COLOR_RED='\033[38;5;203m'        # #c34043
+COLOR_GREEN='\033[38;5;108m'      # #76946a
+COLOR_YELLOW='\033[38;5;186m'     # #c0a36e
+COLOR_BLUE='\033[38;5;110m'       # #7e9cd8
+COLOR_MAGENTA='\033[38;5;175m'    # #957fb8
+COLOR_CYAN='\033[38;5;109m'       # #7fb4ca
+COLOR_ORANGE='\033[38;5;209m'     # #ffa066
+
+# Neutral colors
+COLOR_GRAY='\033[38;5;102m'       # #727169
+COLOR_WHITE='\033[38;5;223m'      # #dcd7ba
+COLOR_DIM='\033[38;5;245m'
+
+# Text styles
+STYLE_BOLD='\033[1m'
+STYLE_DIM='\033[2m'
+STYLE_ITALIC='\033[3m'
+STYLE_RESET='\033[0m'
+
+# =============================================================================
+# FZF THEME
+# =============================================================================
+
+FZF_COLORS='
+  --color=fg:#dcd7ba,fg+:#dcd7ba,bg:#1f1f28,bg+:#2a2a37
+  --color=hl:#7e9cd8,hl+:#7fb4ca,info:#76946a,marker:#76946a
+  --color=prompt:#c34043,spinner:#957fb8,pointer:#957fb8,header:#7e9cd8
+  --color=border:#54546d,label:#dcd7ba,query:#dcd7ba
+  --color=gutter:#1f1f28,scrollbar:#54546d
+'
+
+FZF_STYLE='
+  --border="rounded" --border-label="" --preview-window="border-rounded"
+  --prompt="  " --marker=" " --pointer="▌"
+  --separator="─" --scrollbar="▐"  --padding="0,1" --margin="0"
+'
+
+# =============================================================================
+# UI ELEMENTS
+# =============================================================================
+
+BOX_TOP_LEFT="╭"
+BOX_TOP_RIGHT="╮"
+BOX_BOTTOM_LEFT="╰"
+BOX_BOTTOM_RIGHT="╯"
+BOX_HORIZONTAL="─"
+BOX_VERTICAL="│"
+BOX_SEPARATOR="┈"
+
+# =============================================================================
+# GUM THEME (hex colors for charmbracelet/gum)
+# =============================================================================
+GUM_CONFIRM_PROMPT_FOREGROUND="#dcd7ba"
+GUM_CONFIRM_SELECTED_BACKGROUND="#76946a"
+GUM_CONFIRM_SELECTED_FOREGROUND="#1f1f28"
+GUM_CONFIRM_UNSELECTED_BACKGROUND="#2a2a37"
+GUM_CONFIRM_UNSELECTED_FOREGROUND="#dcd7ba"
+GUM_INPUT_CURSOR_FOREGROUND="#76946a"
+GUM_INPUT_PROMPT_FOREGROUND="#7fb4ca"
+GUM_INPUT_HEADER_FOREGROUND="#7e9cd8"
+GUM_SPIN_SPINNER_FOREGROUND="#7fb4ca"
+
+# Icons (Nerd Font required)
+ICON_HOME="󰋜"
+ICON_SEARCH=""
+ICON_PLAYLIST="󰐑"
+ICON_WATCH_LATER=""
+ICON_LIKED=""
+ICON_SAVED=""
+ICON_HISTORY=""
+ICON_RECENT=""
+ICON_SUBSCRIPTION="󰵀"
+ICON_CHANNEL="󰑈"
+ICON_CUSTOM=""
+ICON_CLIPS=""
+ICON_SETTINGS=""
+ICON_CONFIG=""
+ICON_EXIT="󰈆"
+ICON_PLAY=""
+ICON_DOWNLOAD=""
+ICON_AUDIO=""

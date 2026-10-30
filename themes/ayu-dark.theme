@@ -1,0 +1,95 @@
+# yt-x Theme: Ayu Dark
+# A simple, bright and elegant theme
+# https://github.com/ayu-theme
+
+# Theme metadata
+THEME_NAME="Ayu Dark"
+THEME_AUTHOR="Ike Ku (dempfi), yt-x adaptation"
+THEME_VERSION="1.0"
+
+# =============================================================================
+# TERMINAL COLORS (256-color palette)
+# =============================================================================
+
+# Primary colors
+COLOR_RED='\033[38;5;203m'        # #f07178
+COLOR_GREEN='\033[38;5;149m'      # #aad94c
+COLOR_YELLOW='\033[38;5;221m'     # #e6b450
+COLOR_BLUE='\033[38;5;75m'        # #59c2ff
+COLOR_MAGENTA='\033[38;5;176m'    # #d2a6ff
+COLOR_CYAN='\033[38;5;80m'        # #73b8ff
+COLOR_ORANGE='\033[38;5;209m'     # #ff8f40
+
+# Neutral colors
+COLOR_GRAY='\033[38;5;241m'       # #636a72
+COLOR_WHITE='\033[38;5;188m'      # #bfbdb6
+COLOR_DIM='\033[38;5;245m'
+
+# Text styles
+STYLE_BOLD='\033[1m'
+STYLE_DIM='\033[2m'
+STYLE_ITALIC='\033[3m'
+STYLE_RESET='\033[0m'
+
+# =============================================================================
+# FZF THEME
+# =============================================================================
+
+FZF_COLORS='
+  --color=fg:#bfbdb6,fg+:#bfbdb6,bg:#0d1017,bg+:#131721
+  --color=hl:#59c2ff,hl+:#59c2ff,info:#aad94c,marker:#aad94c
+  --color=prompt:#f07178,spinner:#d2a6ff,pointer:#d2a6ff,header:#59c2ff
+  --color=border:#636a72,label:#bfbdb6,query:#bfbdb6
+  --color=gutter:#0d1017,scrollbar:#636a72
+'
+
+FZF_STYLE='
+  --border="rounded" --border-label="" --preview-window="border-rounded"
+  --prompt="  " --marker=" " --pointer="▌"
+  --separator="─" --scrollbar="▐"  --padding="0,1" --margin="0"
+'
+
+# =============================================================================
+# UI ELEMENTS
+# =============================================================================
+
+BOX_TOP_LEFT="╭"
+BOX_TOP_RIGHT="╮"
+BOX_BOTTOM_LEFT="╰"
+BOX_BOTTOM_RIGHT="╯"
+BOX_HORIZONTAL="─"
+BOX_VERTICAL="│"
+BOX_SEPARATOR="┈"
+
+# =============================================================================
+# GUM THEME (hex colors for charmbracelet/gum)
+# =============================================================================
+GUM_CONFIRM_PROMPT_FOREGROUND="#bfbdb6"
+GUM_CONFIRM_SELECTED_BACKGROUND="#aad94c"
+GUM_CONFIRM_SELECTED_FOREGROUND="#0d1017"
+GUM_CONFIRM_UNSELECTED_BACKGROUND="#131721"
+GUM_CONFIRM_UNSELECTED_FOREGROUND="#bfbdb6"
+GUM_INPUT_CURSOR_FOREGROUND="#aad94c"
+GUM_INPUT_PROMPT_FOREGROUND="#59c2ff"
+GUM_INPUT_HEADER_FOREGROUND="#73b8ff"
+GUM_SPIN_SPINNER_FOREGROUND="#59c2ff"
+
+# Icons (Nerd Font required)
+ICON_HOME="󰋜"
+ICON_SEARCH=""
+ICON_PLAYLIST="󰐑"
+ICON_WATCH_LATER=""
+ICON_LIKED=""
+ICON_SAVED=""
+ICON_HISTORY=""
+ICON_RECENT=""
+ICON_SUBSCRIPTION="󰵀"
+ICON_CHANNEL="󰑈"
+ICON_CUSTOM=""
+ICON_CLIPS=""
+ICON_SETTINGS=""
+ICON_CONFIG=""
+ICON_EXIT="󰈆"
+ICON_PLAY=""
+ICON_DOWNLOAD=""
+ICON_AUDIO=""

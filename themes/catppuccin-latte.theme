@@ -1,0 +1,95 @@
+# yt-x Theme: Catppuccin Latte
+# A soothing pastel theme - light variant
+# https://github.com/catppuccin/catppuccin
+
+# Theme metadata
+THEME_NAME="Catppuccin Latte"
+THEME_AUTHOR="Catppuccin, yt-x adaptation"
+THEME_VERSION="1.0"
+
+# =============================================================================
+# TERMINAL COLORS (256-color palette)
+# =============================================================================
+
+# Primary colors
+COLOR_RED='\033[38;5;124m'        # #d20f39
+COLOR_GREEN='\033[38;5;28m'       # #40a02b
+COLOR_YELLOW='\033[38;5;172m'     # #df8e1d
+COLOR_BLUE='\033[38;5;32m'        # #1e66f5
+COLOR_MAGENTA='\033[38;5;127m'    # #8839ef
+COLOR_CYAN='\033[38;5;30m'        # #179299
+COLOR_ORANGE='\033[38;5;166m'     # #fe640b
+
+# Neutral colors
+COLOR_GRAY='\033[38;5;145m'       # #9ca0b0 (overlay0)
+COLOR_WHITE='\033[38;5;236m'      # #4c4f69 (text)
+COLOR_DIM='\033[38;5;249m'
+
+# Text styles
+STYLE_BOLD='\033[1m'
+STYLE_DIM='\033[2m'
+STYLE_ITALIC='\033[3m'
+STYLE_RESET='\033[0m'
+
+# =============================================================================
+# FZF THEME
+# =============================================================================
+
+FZF_COLORS='
+  --color=fg:#4c4f69,fg+:#4c4f69,bg:#eff1f5,bg+:#ccd0da
+  --color=hl:#1e66f5,hl+:#1e66f5,info:#40a02b,marker:#40a02b
+  --color=prompt:#d20f39,spinner:#8839ef,pointer:#8839ef,header:#1e66f5
+  --color=border:#9ca0b0,label:#4c4f69,query:#4c4f69
+  --color=gutter:#eff1f5,scrollbar:#9ca0b0
+'
+
+FZF_STYLE='
+  --border="rounded" --border-label="" --preview-window="border-rounded"
+  --prompt="  " --marker=" " --pointer="▌"
+  --separator="─" --scrollbar="▐"  --padding="0,1" --margin="0"
+'
+
+# =============================================================================
+# UI ELEMENTS
+# =============================================================================
+
+BOX_TOP_LEFT="╭"
+BOX_TOP_RIGHT="╮"
+BOX_BOTTOM_LEFT="╰"
+BOX_BOTTOM_RIGHT="╯"
+BOX_HORIZONTAL="─"
+BOX_VERTICAL="│"
+BOX_SEPARATOR="┈"
+
+# =============================================================================
+# GUM THEME (hex colors for charmbracelet/gum)
+# =============================================================================
+GUM_CONFIRM_PROMPT_FOREGROUND="#4c4f69"
+GUM_CONFIRM_SELECTED_BACKGROUND="#40a02b"
+GUM_CONFIRM_SELECTED_FOREGROUND="#eff1f5"
+GUM_CONFIRM_UNSELECTED_BACKGROUND="#ccd0da"
+GUM_CONFIRM_UNSELECTED_FOREGROUND="#4c4f69"
+GUM_INPUT_CURSOR_FOREGROUND="#40a02b"
+GUM_INPUT_PROMPT_FOREGROUND="#179299"
+GUM_INPUT_HEADER_FOREGROUND="#1e66f5"
+GUM_SPIN_SPINNER_FOREGROUND="#179299"
+
+# Icons (Nerd Font required)
+ICON_HOME="󰋜"
+ICON_SEARCH=""
+ICON_PLAYLIST="󰐑"
+ICON_WATCH_LATER=""
+ICON_LIKED=""
+ICON_SAVED=""
+ICON_HISTORY=""
+ICON_RECENT=""
+ICON_SUBSCRIPTION="󰵀"
+ICON_CHANNEL="󰑈"
+ICON_CUSTOM=""
+ICON_CLIPS=""
+ICON_SETTINGS=""
+ICON_CONFIG=""
+ICON_EXIT="󰈆"
+ICON_PLAY=""
+ICON_DOWNLOAD=""
+ICON_AUDIO=""

@@ -66,6 +66,19 @@ BOX_HORIZONTAL="─"
 BOX_VERTICAL="│"
 BOX_SEPARATOR="┈"
 
+# =============================================================================
+# GUM THEME (hex colors for charmbracelet/gum)
+# =============================================================================
+GUM_CONFIRM_PROMPT_FOREGROUND="#d3c6aa"
+GUM_CONFIRM_SELECTED_BACKGROUND="#a7c080"
+GUM_CONFIRM_SELECTED_FOREGROUND="#272e33"
+GUM_CONFIRM_UNSELECTED_BACKGROUND="#3c4841"
+GUM_CONFIRM_UNSELECTED_FOREGROUND="#d3c6aa"
+GUM_INPUT_CURSOR_FOREGROUND="#a7c080"
+GUM_INPUT_PROMPT_FOREGROUND="#83c092"
+GUM_INPUT_HEADER_FOREGROUND="#7fbbb3"
+GUM_SPIN_SPINNER_FOREGROUND="#83c092"
+
 # Icons (Nerd Font required)
 ICON_HOME="󰋜"
 ICON_SEARCH=""

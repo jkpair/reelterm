@@ -1,0 +1,95 @@
+# yt-x Theme: Everforest Light
+# A comfortable and pleasant color scheme - light variant
+# https://github.com/sainnhe/everforest
+
+# Theme metadata
+THEME_NAME="Everforest Light"
+THEME_AUTHOR="Sainnhe Park (Everforest), yt-x adaptation"
+THEME_VERSION="1.0"
+
+# =============================================================================
+# TERMINAL COLORS (256-color palette)
+# =============================================================================
+
+# Primary colors
+COLOR_RED='\033[38;5;131m'        # #f85552
+COLOR_GREEN='\033[38;5;65m'       # #8da101
+COLOR_YELLOW='\033[38;5;136m'     # #dfa000
+COLOR_BLUE='\033[38;5;66m'        # #3a94c5
+COLOR_MAGENTA='\033[38;5;132m'    # #df69ba
+COLOR_CYAN='\033[38;5;72m'        # #35a77c
+COLOR_ORANGE='\033[38;5;166m'     # #f57d26
+
+# Neutral colors
+COLOR_GRAY='\033[38;5;145m'       # #a6b0a0
+COLOR_WHITE='\033[38;5;59m'       # #5c6a72 (fg)
+COLOR_DIM='\033[38;5;249m'
+
+# Text styles
+STYLE_BOLD='\033[1m'
+STYLE_DIM='\033[2m'
+STYLE_ITALIC='\033[3m'
+STYLE_RESET='\033[0m'
+
+# =============================================================================
+# FZF THEME
+# =============================================================================
+
+FZF_COLORS='
+  --color=fg:#5c6a72,fg+:#5c6a72,bg:#fdf6e3,bg+:#f0f2d4
+  --color=hl:#35a77c,hl+:#35a77c,info:#8da101,marker:#8da101
+  --color=prompt:#f85552,spinner:#df69ba,pointer:#df69ba,header:#3a94c5
+  --color=border:#a6b0a0,label:#5c6a72,query:#5c6a72
+  --color=gutter:#fdf6e3,scrollbar:#a6b0a0
+'
+
+FZF_STYLE='
+  --border="rounded" --border-label="" --preview-window="border-rounded"
+  --prompt="  " --marker=" " --pointer="▌"
+  --separator="─" --scrollbar="▐"  --padding="0,1" --margin="0"
+'
+
+# =============================================================================
+# UI ELEMENTS
+# =============================================================================
+
+BOX_TOP_LEFT="╭"
+BOX_TOP_RIGHT="╮"
+BOX_BOTTOM_LEFT="╰"
+BOX_BOTTOM_RIGHT="╯"
+BOX_HORIZONTAL="─"
+BOX_VERTICAL="│"
+BOX_SEPARATOR="┈"
+
+# =============================================================================
+# GUM THEME (hex colors for charmbracelet/gum)
+# =============================================================================
+GUM_CONFIRM_PROMPT_FOREGROUND="#5c6a72"
+GUM_CONFIRM_SELECTED_BACKGROUND="#8da101"
+GUM_CONFIRM_SELECTED_FOREGROUND="#fdf6e3"
+GUM_CONFIRM_UNSELECTED_BACKGROUND="#f0f2d4"
+GUM_CONFIRM_UNSELECTED_FOREGROUND="#5c6a72"
+GUM_INPUT_CURSOR_FOREGROUND="#8da101"
+GUM_INPUT_PROMPT_FOREGROUND="#35a77c"
+GUM_INPUT_HEADER_FOREGROUND="#3a94c5"
+GUM_SPIN_SPINNER_FOREGROUND="#35a77c"
+
+# Icons (Nerd Font required)
+ICON_HOME="󰋜"
+ICON_SEARCH=""
+ICON_PLAYLIST="󰐑"
+ICON_WATCH_LATER=""
+ICON_LIKED=""
+ICON_SAVED=""
+ICON_HISTORY=""
+ICON_RECENT=""
+ICON_SUBSCRIPTION="󰵀"
+ICON_CHANNEL="󰑈"
+ICON_CUSTOM=""
+ICON_CLIPS=""
+ICON_SETTINGS=""
+ICON_CONFIG=""
+ICON_EXIT="󰈆"
+ICON_PLAY=""
+ICON_DOWNLOAD=""
+ICON_AUDIO=""
