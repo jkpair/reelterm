@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -417,14 +418,15 @@ func downloadAll(env *Env, l *VideoList, name string, audio bool) tea.Cmd {
 
 // openShell drops into the user's shell with the video's details exported.
 func openShell(env *Env, l *VideoList, e ytdlp.Entry) tea.Cmd {
-	sh := os.Getenv("SHELL")
-	if sh == "" {
-		sh = "bash"
+	vars := "$url $urlForAll $video_url $video_id $video_title $playlist_title $DOWNLOAD_DIRECTORY $CLI_YT_DLP_ARCHIVE"
+	if runtime.GOOS == "windows" {
+		vars = "%url% %urlForAll% %video_url% %video_id% %video_title% %playlist_title% %DOWNLOAD_DIRECTORY% %CLI_YT_DLP_ARCHIVE%"
 	}
-	banner := env.Paths.Name + " shell. Variables: $url $urlForAll $video_url $video_id $video_title $playlist_title $DOWNLOAD_DIRECTORY $CLI_YT_DLP_ARCHIVE. Type exit to return."
-	cmd := exec.Command("sh", "-c", `clear; printf '%s\n\n' "$YTX_BANNER"; exec "$YTX_SHELL"`)
-	cmd.Env = append(os.Environ(),
-		"YTX_BANNER="+banner, "YTX_SHELL="+sh,
+	cmd := player.InteractiveShell(env.Paths.Name + " shell. Variables: " + vars + ". Type exit to return.")
+	if cmd.Env == nil {
+		cmd.Env = os.Environ()
+	}
+	cmd.Env = append(cmd.Env,
 		"url="+l.src.URL, "urlForAll="+l.src.URLForAll, "video_url="+e.WatchURL(), "video_id="+e.ID,
 		"video_title="+e.Title, "playlist_title="+l.src.Title, "DOWNLOAD_DIRECTORY="+env.Cfg.DownloadDirectory,
 		"CLI_YT_DLP_ARCHIVE="+env.Paths.ArchiveDir, "CLI_NAME="+env.Paths.Name,

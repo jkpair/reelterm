@@ -8,7 +8,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -299,7 +298,7 @@ func (r *Runtime) register() {
 		return 0
 	})
 	fn("shell", func(L *lua.LState) int {
-		out, err := exec.Command("sh", "-c", L.CheckString(1)).CombinedOutput()
+		out, err := player.ShellCommand(L.CheckString(1)).CombinedOutput()
 		L.Push(lua.LString(strings.TrimRight(string(out), "\n")))
 		if err != nil {
 			L.Push(lua.LString(err.Error()))

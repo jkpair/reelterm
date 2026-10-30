@@ -135,7 +135,7 @@ func Update(ctx context.Context, repo, name, current string) (string, error) {
 	}
 	tmp, err := os.CreateTemp(filepath.Dir(exe), ".yt-x-update-*")
 	if err != nil {
-		return "", fmt.Errorf("cannot write next to %s (try sudo): %w", exe, err)
+		return "", fmt.Errorf("cannot write next to %s (try sudo, or an administrator prompt on Windows): %w", exe, err)
 	}
 	defer os.Remove(tmp.Name())
 	n, err := io.Copy(tmp, resp.Body)
@@ -149,8 +149,37 @@ func Update(ctx context.Context, repo, name, current string) (string, error) {
 	if err := os.Chmod(tmp.Name(), 0o755); err != nil {
 		return "", err
 	}
-	if err := os.Rename(tmp.Name(), exe); err != nil {
+	if err := replaceExe(exe, tmp.Name()); err != nil {
 		return "", err
 	}
 	return r.TagName, nil
+}
+
+// replaceExe moves newPath over exe. On Windows a running .exe can't be
+// overwritten but can be renamed out of the way; CleanupOld removes it on
+// the next start.
+func replaceExe(exe, newPath string) error {
+	if runtime.GOOS != "windows" {
+		return os.Rename(newPath, exe)
+	}
+	old := exe + ".old"
+	_ = os.Remove(old)
+	if err := os.Rename(exe, old); err != nil {
+		return err
+	}
+	if err := os.Rename(newPath, exe); err != nil {
+		_ = os.Rename(old, exe)
+		return err
+	}
+	return nil
+}
+
+// CleanupOld removes the previous binary left behind by a Windows update.
+func CleanupOld() {
+	if runtime.GOOS != "windows" {
+		return
+	}
+	if exe, err := os.Executable(); err == nil {
+		_ = os.Remove(exe + ".old")
+	}
 }

@@ -5,7 +5,7 @@
 # their next update ("Check for Updates" or `yt-x -U`): the old updater
 # downloads this file and runs it, and it swaps itself for the binary of the
 # latest release. To install fresh, use install.sh from the releases page.
-CLI_VERSION="1.0.0"
+CLI_VERSION="1.0.1"
 
 set -eu
 repo="jkpair/yt-x-plus"

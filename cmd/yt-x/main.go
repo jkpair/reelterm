@@ -56,6 +56,7 @@ func main() {
 }
 
 func run() error {
+	selfupdate.CleanupOld()
 	paths := app.NewPaths()
 	if err := paths.Ensure(); err != nil {
 		return err

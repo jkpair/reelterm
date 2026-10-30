@@ -8,9 +8,12 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
+	"unicode/utf16"
 
 	"github.com/jkpair/yt-x-plus/internal/app"
 	"github.com/jkpair/yt-x-plus/internal/config"
@@ -74,7 +77,7 @@ func (p *Player) Command(ctx context.Context, req Request) (*exec.Cmd, error) {
 		if req.AudioOnly {
 			args = append(args, "--no-video")
 		}
-		return exec.Command("vlc", args...), nil
+		return exec.Command(vlcBin(), args...), nil
 	}
 	args := append([]string{}, p.YT.MpvOpts()...)
 	args = append(args, p.YT.BuildOpts(p.Cfg, ytdlp.ModeStream)...)
@@ -188,18 +191,39 @@ func Classify(stderr string) (msg string, bot bool) {
 
 // OpenURL opens a URL with the desktop handler.
 func OpenURL(u string) error {
-	for _, bin := range []string{"xdg-open", "open", "termux-open-url"} {
-		if _, err := exec.LookPath(bin); err == nil {
-			c := exec.Command(bin, u)
-			c.Stdout, c.Stderr = io.Discard, io.Discard
-			return c.Start()
+	var c *exec.Cmd
+	if runtime.GOOS == "windows" {
+		// rundll32 avoids cmd.exe's "start" mangling URLs that contain &.
+		c = exec.Command("rundll32", "url.dll,FileProtocolHandler", u)
+	} else {
+		for _, bin := range []string{"xdg-open", "open", "termux-open-url"} {
+			if _, err := exec.LookPath(bin); err == nil {
+				c = exec.Command(bin, u)
+				break
+			}
 		}
 	}
-	return errors.New("could not find xdg-open or open")
+	if c == nil {
+		return errors.New("could not find xdg-open or open")
+	}
+	c.Stdout, c.Stderr = io.Discard, io.Discard
+	return c.Start()
 }
 
 // Copy puts text on the clipboard.
 func Copy(text string) error {
+	if runtime.GOOS == "windows" {
+		// clip.exe reads UTF-16LE with a BOM; plain UTF-8 garbles non-ASCII titles.
+		u := utf16.Encode([]rune(text))
+		buf := make([]byte, 2, 2+2*len(u))
+		buf[0], buf[1] = 0xFF, 0xFE
+		for _, r := range u {
+			buf = append(buf, byte(r), byte(r>>8))
+		}
+		c := exec.Command("clip")
+		c.Stdin = bytes.NewReader(buf)
+		return c.Run()
+	}
 	tools := [][]string{{"wl-copy"}, {"xclip", "-selection", "clipboard"}, {"xsel", "--clipboard", "--input"}, {"pbcopy"}, {"termux-clipboard-set"}}
 	for _, t := range tools {
 		if _, err := exec.LookPath(t[0]); err == nil {
@@ -209,6 +233,49 @@ func Copy(text string) error {
 		}
 	}
 	return errors.New("no clipboard tool found (install wl-copy, xclip, or xsel)")
+}
+
+// ShellCommand runs a command line with the platform shell (sh or cmd.exe).
+func ShellCommand(cmdline string) *exec.Cmd {
+	if runtime.GOOS == "windows" {
+		return exec.Command(comspec(), "/C", cmdline)
+	}
+	return exec.Command("sh", "-c", cmdline)
+}
+
+// InteractiveShell opens the user's shell after printing banner.
+func InteractiveShell(banner string) *exec.Cmd {
+	if runtime.GOOS == "windows" {
+		return exec.Command(comspec(), "/K", "cls & echo "+banner+" & echo.")
+	}
+	sh := os.Getenv("SHELL")
+	if sh == "" {
+		sh = "bash"
+	}
+	c := exec.Command("sh", "-c", `clear; printf '%s\n\n' "$YTX_BANNER"; exec "$YTX_SHELL"`)
+	c.Env = append(os.Environ(), "YTX_BANNER="+banner, "YTX_SHELL="+sh)
+	return c
+}
+
+func comspec() string {
+	if c := os.Getenv("COMSPEC"); c != "" {
+		return c
+	}
+	return "cmd.exe"
+}
+
+// vlcBin finds vlc, including its default install folder on Windows.
+func vlcBin() string {
+	if _, err := exec.LookPath("vlc"); err == nil || runtime.GOOS != "windows" {
+		return "vlc"
+	}
+	for _, env := range []string{"ProgramFiles", "ProgramFiles(x86)"} {
+		p := filepath.Join(os.Getenv(env), "VideoLAN", "VLC", "vlc.exe")
+		if _, err := os.Stat(p); err == nil {
+			return p
+		}
+	}
+	return "vlc"
 }
 
 // Notify sends a desktop notification when a notifier is available.
@@ -222,7 +289,11 @@ func Notify(title, body string) {
 
 // EditorCmd returns a command opening file in the preferred editor.
 func EditorCmd(editor, file string) (*exec.Cmd, error) {
-	for _, e := range []string{editor, os.Getenv("EDITOR"), "xdg-open", "open"} {
+	fallbacks := []string{"xdg-open", "open"}
+	if runtime.GOOS == "windows" {
+		fallbacks = []string{"notepad"}
+	}
+	for _, e := range append([]string{editor, os.Getenv("EDITOR")}, fallbacks...) {
 		if e == "" {
 			continue
 		}

@@ -22,13 +22,13 @@ type Dep struct {
 }
 
 var All = []Dep{
-	{Name: "yt-dlp", Bins: []string{"yt-dlp"}, Required: true, Purpose: "fetching YouTube data and streams"},
-	{Name: "mpv", Bins: []string{"mpv", "mpv.exe", "vlc"}, Required: true, Purpose: "playback (or vlc)"},
-	{Name: "ffmpeg", Bins: []string{"ffmpeg"}, Required: true, Purpose: "merging and converting downloads"},
-	{Name: "chafa", Bins: []string{"chafa"}, Purpose: "optional thumbnail renderer (IMAGE_RENDERER: chafa)"},
-	{Name: "libnotify", Bins: []string{"notify-send"}, Purpose: "desktop notifications", Pkg: map[string]string{"apt": "libnotify-bin", "brew": ""}},
-	{Name: "clipboard", Bins: []string{"wl-copy", "xclip", "xsel", "pbcopy", "termux-clipboard-set"}, Purpose: "Copy Link",
-		Pkg: map[string]string{"pacman": "wl-clipboard", "apt": "wl-clipboard", "dnf": "wl-clipboard", "zypper": "wl-clipboard", "xbps": "wl-clipboard", "apk": "wl-clipboard", "brew": ""}},
+	{Name: "yt-dlp", Bins: []string{"yt-dlp"}, Required: true, Purpose: "fetching YouTube data and streams", Pkg: map[string]string{"winget": "yt-dlp.yt-dlp"}},
+	{Name: "mpv", Bins: []string{"mpv", "mpv.exe", "vlc"}, Required: true, Purpose: "playback (or vlc)", Pkg: map[string]string{"winget": ""}},
+	{Name: "ffmpeg", Bins: []string{"ffmpeg"}, Required: true, Purpose: "merging and converting downloads", Pkg: map[string]string{"winget": "Gyan.FFmpeg"}},
+	{Name: "chafa", Bins: []string{"chafa"}, Purpose: "optional thumbnail renderer (IMAGE_RENDERER: chafa)", Pkg: map[string]string{"winget": ""}},
+	{Name: "libnotify", Bins: []string{"notify-send"}, Purpose: "desktop notifications", Pkg: map[string]string{"apt": "libnotify-bin", "brew": "", "winget": ""}},
+	{Name: "clipboard", Bins: []string{"wl-copy", "xclip", "xsel", "pbcopy", "termux-clipboard-set", "clip"}, Purpose: "Copy Link",
+		Pkg: map[string]string{"pacman": "wl-clipboard", "apt": "wl-clipboard", "dnf": "wl-clipboard", "zypper": "wl-clipboard", "xbps": "wl-clipboard", "apk": "wl-clipboard", "brew": "", "winget": ""}},
 }
 
 // Found returns the first available binary for d, or "".
@@ -73,6 +73,12 @@ func Report(w io.Writer) bool {
 type manager struct{ name, install string }
 
 func detect() *manager {
+	if runtime.GOOS == "windows" {
+		if _, err := exec.LookPath("winget"); err == nil {
+			return &manager{"winget", "winget install -e --id"}
+		}
+		return nil
+	}
 	if runtime.GOOS == "darwin" {
 		return &manager{"brew", "brew install"}
 	}
@@ -116,16 +122,50 @@ func Install(in io.Reader, out io.Writer, includeOptional bool) error {
 			pkgs = append(pkgs, p)
 		}
 	}
-	cmdline := m.install + " " + strings.Join(pkgs, " ")
-	fmt.Fprintf(out, "Will run: %s\nProceed? [y/N]: ", cmdline)
+	// winget installs one package per command.
+	var cmdlines []string
+	if m.name == "winget" {
+		for _, p := range pkgs {
+			cmdlines = append(cmdlines, m.install+" "+p)
+		}
+	} else if len(pkgs) > 0 {
+		cmdlines = []string{m.install + " " + strings.Join(pkgs, " ")}
+	}
+	manual := manualSteps(m.name, missing)
+	if len(cmdlines) == 0 {
+		return fmt.Errorf("install manually:\n%s", manual)
+	}
+	fmt.Fprintf(out, "Will run:\n  %s\nProceed? [y/N]: ", strings.Join(cmdlines, "\n  "))
 	ans, _ := bufio.NewReader(in).ReadString('\n')
 	if a := strings.ToLower(strings.TrimSpace(ans)); a != "y" && a != "yes" {
 		return fmt.Errorf("cancelled")
 	}
-	f := strings.Fields(cmdline)
-	c := exec.Command(f[0], f[1:]...)
-	c.Stdin, c.Stdout, c.Stderr = os.Stdin, os.Stdout, os.Stderr
-	return c.Run()
+	for _, cl := range cmdlines {
+		f := strings.Fields(cl)
+		c := exec.Command(f[0], f[1:]...)
+		c.Stdin, c.Stdout, c.Stderr = os.Stdin, os.Stdout, os.Stderr
+		if err := c.Run(); err != nil {
+			return err
+		}
+	}
+	if manual != "" {
+		fmt.Fprintf(out, "\nStill needed:\n%s\n", manual)
+	}
+	if m.name == "winget" {
+		fmt.Fprintln(out, "Open a new terminal so the newly installed programs are on your PATH.")
+	}
+	return nil
+}
+
+// manualSteps lists required deps the package manager can't install.
+func manualSteps(manager string, missing []Dep) string {
+	var lines []string
+	for _, d := range missing {
+		if p, ok := d.Pkg[manager]; ok && p == "" && d.Required {
+			lines = append(lines, "  "+d.Name+": "+map[string]string{"mpv": "https://mpv.io/installation/"}[d.Name])
+		}
+	}
+	return strings.Join(lines, "\n")
 }
 
 func names(ds []Dep) string {
@@ -157,6 +197,9 @@ func InstallSelf(dir string, out io.Writer) error {
 		}
 		fmt.Fprintln(out, "Installed to", dst)
 		return nil
+	}
+	if runtime.GOOS == "windows" {
+		return fmt.Errorf("%s is not writable; run from an administrator terminal or choose another folder", dir)
 	}
 	fmt.Fprintf(out, "%s is not writable, using sudo…\n", dir)
 	c := exec.Command("sudo", "install", "-m", "0755", exe, dst)

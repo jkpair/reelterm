@@ -9,7 +9,7 @@ import (
 )
 
 // Version is set at build time with -ldflags "-X .../internal/app.Version=x.y.z".
-var Version = "1.0.0"
+var Version = "1.0.1"
 
 const (
 	Author            = "Benexl"
@@ -46,7 +46,22 @@ func xdg(env, fallback string) string {
 		return v
 	}
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, fallback)
+	dir := filepath.Join(home, fallback)
+	if runtime.GOOS == "windows" {
+		// Use %APPDATA% / %LOCALAPPDATA% unless an earlier install (e.g.
+		// the Bash version under Git Bash) already lives in ~/.config.
+		if _, err := os.Stat(filepath.Join(dir, Name())); err == nil {
+			return dir
+		}
+		native := os.UserConfigDir
+		if env == "XDG_CACHE_HOME" {
+			native = os.UserCacheDir
+		}
+		if d, err := native(); err == nil {
+			return d
+		}
+	}
+	return dir
 }
 
 // NewPaths resolves the directory layout (same locations as the Bash version).

@@ -2,6 +2,7 @@ package thumb
 
 import (
 	"os"
+	"runtime"
 	"strings"
 	"time"
 
@@ -51,6 +52,12 @@ func Parse(s string) (Protocol, bool) {
 func Detect(setting string) Protocol {
 	if p, ok := Parse(setting); ok {
 		return p
+	}
+	if runtime.GOOS == "windows" {
+		// Sixel needs Windows Terminal 1.22+ and the cell pixel size can't be
+		// read, so images could be mis-sized; half-blocks always work.
+		// IMAGE_RENDERER: sixel opts in.
+		return HalfBlock
 	}
 	env := os.Getenv
 	termName := env("TERM")

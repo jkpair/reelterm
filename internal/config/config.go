@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"text/template"
@@ -131,6 +132,9 @@ func fromRaw(raw map[string]string) *Config {
 	editor := os.Getenv("EDITOR")
 	if editor == "" {
 		editor = "open"
+		if runtime.GOOS == "windows" {
+			editor = "notepad"
+		}
 	}
 	dl := app.ExpandHome(raw["DOWNLOAD_DIRECTORY"])
 	if dl == "" {

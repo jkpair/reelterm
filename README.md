@@ -43,6 +43,25 @@ sudo apk add --allow-untrusted ./yt-x_*_linux_amd64.apk
 Builds are available for `amd64`, `arm64` and `armv7` (e.g. Raspberry Pi).
 Plain binaries (`yt-x-linux-amd64`, …) and tarballs are attached too.
 
+### Windows (experimental)
+
+> [!WARNING]
+> The Windows build is **experimental**. It's built and its tests pass, but
+> it hasn't been tried on a real Windows machine yet. Bug reports are welcome.
+
+Download `yt-x-windows-amd64.exe` from the
+[latest release](https://github.com/jkpair/yt-x-plus/releases/latest), rename
+it to `yt-x.exe` and put it somewhere on your `PATH`. Use Windows Terminal with
+a Nerd Font.
+
+`yt-x --install` installs yt-dlp and ffmpeg with winget. Install
+[mpv](https://mpv.io/installation/) (or VLC) yourself. Config and cache live
+in `%APPDATA%\yt-x` and `%LOCALAPPDATA%\yt-x`.
+
+Thumbnails default to colour blocks on Windows. On Windows Terminal 1.22 or
+newer you can try real images with `IMAGE_RENDERER: sixel`, though they may
+be sized incorrectly.
+
 ### Nix
 
 ```bash
@@ -92,7 +111,8 @@ Optional: `chafa` (alternative thumbnail renderer), `notify-send`
 
 `yt-x --check-deps` shows what is installed and which image protocol your
 terminal gets. `yt-x --install` installs anything missing with your package
-manager (pacman, apt, dnf, zypper, xbps, apk, emerge, brew or Termux).
+manager (pacman, apt, dnf, zypper, xbps, apk, emerge, brew, Termux, or winget
+on Windows).
 
 ## Features
 

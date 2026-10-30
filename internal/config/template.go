@@ -24,7 +24,8 @@ VIDEO_QUALITY: {{.VideoQuality}}
 ENABLE_PREVIEW: {{.EnablePreview}}
 
 # how to draw thumbnails [auto/kitty/sixel/iterm/halfblock/chafa]
-# auto picks the best protocol your terminal supports
+# auto picks the best protocol your terminal supports (halfblock on Windows;
+# Windows Terminal 1.22+ users can try sixel)
 IMAGE_RENDERER: {{.ImageRenderer}}
 
 # resume videos where you stopped watching (mpv) [true/false]
