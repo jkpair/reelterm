@@ -132,6 +132,12 @@ func run() error {
 	for _, e := range pluginErrs {
 		startup = append(startup, tui.Toast(e))
 	}
+	if exe, link, ok := selfupdate.LegacyInstall(app.LegacyName, paths.Name); ok {
+		if stamp := filepath.Join(paths.CacheDir, ".rename_notice"); !exists(stamp) {
+			startup = append(startup, tui.Push(tui.NewMessage(env, "yt-x is now "+paths.Name, renameNotice(paths.Name, exe, link))))
+			_ = os.WriteFile(stamp, nil, 0o644)
+		}
+	}
 	root.Startup = startup
 
 	p := tea.NewProgram(root, tea.WithAltScreen(), tea.WithMouseCellMotion())
@@ -143,6 +149,19 @@ func run() error {
 	}
 	byebye(env)
 	return nil
+}
+
+func exists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
+}
+
+// renameNotice tells users still running the binary as yt-x about the new name.
+func renameNotice(name, exe, link string) string {
+	if link != "" {
+		return fmt.Sprintf("This install is still called yt-x, so a %s command was added beside it:\n%s\n\nRun %s from now on. yt-x keeps working too, and your settings, history and subscriptions were already moved over.", name, link, name)
+	}
+	return fmt.Sprintf("This install is still called yt-x:\n%s\n\nRename it to %s (or reinstall with install.sh from the releases page) to use the new name. yt-x keeps working until then, and your settings, history and subscriptions were already moved over.", exe, name)
 }
 
 func dueMonthly(stamp string) bool {
@@ -200,6 +219,9 @@ func parseArgs(args []string, cfg *config.Config, paths app.Paths) (opts options
 				fmt.Println("reelterm is up to date :)")
 			default:
 				fmt.Println("Updated to", tag)
+				if _, link, ok := selfupdate.LegacyInstall(app.LegacyName, paths.Name); ok && link != "" {
+					fmt.Printf("yt-x is now %s; linked %s\n", paths.Name, link)
+				}
 			}
 			return opts, true, nil
 		case "-S", "--search":
