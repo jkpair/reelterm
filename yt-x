@@ -2,7 +2,7 @@
 #A script written by Benexl in September 2024 under MIT LICENSE
 
 CLI_NAME="${YT_X_APP_NAME:-yt-x}"
-CLI_VERSION="0.6.1"
+CLI_VERSION="0.6.2"
 
 # ASCII header
 CLI_HEADER='
