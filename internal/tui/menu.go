@@ -250,7 +250,7 @@ func highlight(s Styles, label, q string, sel bool) string {
 	}
 	match := s.Match
 	if sel {
-		match = match.Background(s.T.BgSel)
+		match = s.MatchSel
 	}
 	return base.Render(label[:i]) + match.Render(label[i:i+len(q)]) + base.Render(label[i+len(q):])
 }

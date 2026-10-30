@@ -1,0 +1,96 @@
+# reelterm Theme: DMG-01 Dark
+# Original Game Boy (DMG-01) four-color palette
+# Palette "DMG-01 Accurate" by bloo (https://lospec.com/palette-list/dmg-01-accurate)
+
+# Theme metadata
+THEME_NAME="DMG-01 Dark"
+THEME_AUTHOR="bloo (palette), reelterm adaptation"
+THEME_VERSION="1.0"
+
+# =============================================================================
+# TERMINAL COLORS (256-color palette)
+# =============================================================================
+# The DMG-01 only has four shades, so every accent uses the same one.
+
+# Primary colors
+COLOR_RED='\033[38;5;107m'        # #9a9e3f
+COLOR_GREEN='\033[38;5;107m'      # #9a9e3f
+COLOR_YELLOW='\033[38;5;107m'     # #9a9e3f
+COLOR_BLUE='\033[38;5;107m'       # #9a9e3f
+COLOR_MAGENTA='\033[38;5;107m'    # #9a9e3f
+COLOR_CYAN='\033[38;5;107m'       # #9a9e3f
+COLOR_ORANGE='\033[38;5;107m'     # #9a9e3f
+
+# Neutral colors
+COLOR_GRAY='\033[38;5;58m'        # #496b22
+COLOR_WHITE='\033[38;5;107m'      # #9a9e3f (fg)
+COLOR_DIM='\033[38;5;58m'         # #496b22
+
+# Text styles
+STYLE_BOLD='\033[1m'
+STYLE_DIM='\033[2m'
+STYLE_ITALIC='\033[3m'
+STYLE_RESET='\033[0m'
+
+# =============================================================================
+# FZF THEME
+# =============================================================================
+
+FZF_COLORS='
+  --color=fg:#9a9e3f,fg+:#9a9e3f,bg:#1b2a09,bg+:#0e450b
+  --color=hl:#9a9e3f,hl+:#9a9e3f,info:#9a9e3f,marker:#9a9e3f
+  --color=prompt:#9a9e3f,spinner:#9a9e3f,pointer:#9a9e3f,header:#9a9e3f
+  --color=border:#496b22,label:#9a9e3f,query:#9a9e3f
+  --color=gutter:#1b2a09,scrollbar:#496b22
+'
+
+FZF_STYLE='
+  --border="rounded" --border-label="" --preview-window="border-rounded"
+  --prompt="  " --marker=" " --pointer="▌"
+  --separator="─" --scrollbar="▐"  --padding="0,1" --margin="0"
+'
+
+# =============================================================================
+# UI ELEMENTS
+# =============================================================================
+
+BOX_TOP_LEFT="╭"
+BOX_TOP_RIGHT="╮"
+BOX_BOTTOM_LEFT="╰"
+BOX_BOTTOM_RIGHT="╯"
+BOX_HORIZONTAL="─"
+BOX_VERTICAL="│"
+BOX_SEPARATOR="┈"
+
+# =============================================================================
+# GUM THEME (hex colors for charmbracelet/gum)
+# =============================================================================
+GUM_CONFIRM_PROMPT_FOREGROUND="#9a9e3f"
+GUM_CONFIRM_SELECTED_BACKGROUND="#0e450b"
+GUM_CONFIRM_SELECTED_FOREGROUND="#9a9e3f"
+GUM_CONFIRM_UNSELECTED_BACKGROUND="#1b2a09"
+GUM_CONFIRM_UNSELECTED_FOREGROUND="#9a9e3f"
+GUM_INPUT_CURSOR_FOREGROUND="#9a9e3f"
+GUM_INPUT_PROMPT_FOREGROUND="#9a9e3f"
+GUM_INPUT_HEADER_FOREGROUND="#9a9e3f"
+GUM_SPIN_SPINNER_FOREGROUND="#9a9e3f"
+
+# Icons (Nerd Font required)
+ICON_HOME="󰋜"
+ICON_SEARCH=""
+ICON_PLAYLIST="󰐑"
+ICON_WATCH_LATER=""
+ICON_LIKED=""
+ICON_SAVED=""
+ICON_HISTORY=""
+ICON_RECENT=""
+ICON_SUBSCRIPTION="󰵀"
+ICON_CHANNEL="󰑈"
+ICON_CUSTOM=""
+ICON_CLIPS=""
+ICON_SETTINGS=""
+ICON_CONFIG=""
+ICON_EXIT="󰈆"
+ICON_PLAY=""
+ICON_DOWNLOAD=""
+ICON_AUDIO=""
