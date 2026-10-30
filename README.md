@@ -1,249 +1,226 @@
 # yt-x-plus
 
-A fork of [yt-x](https://github.com/Benexl/yt-x) with additional features and improvements.
+Browse, stream and download YouTube from your terminal, plus other sites
+yt-dlp supports.
 
-Browse YouTube from your terminal.
-Plus other sites yt-dlp supports.
+A fork of [yt-x](https://github.com/Benexl/yt-x), rewritten in Go as a single
+static binary with a built-in interface.
 
 [yt-x-plus-demo.webm](https://github.com/user-attachments/assets/027057fa-7c11-4361-a9b9-6a8d3bcd9776)
 
-## What's New in yt-x-plus
-
-### Copy Link
-Quickly copy a video's URL to your clipboard for sharing. Available in the video action menu under "Other". Supports `wl-copy` (Wayland), `xclip`, `xsel` (X11), and `pbcopy` (macOS).
-
-### ESC Key Back Navigation
-Pressing ESC in the Settings submenu now returns you to the main menu instead of doing nothing.
-
-### yt-dlp Version Check
-- On startup, yt-x-plus checks if your yt-dlp is up to date and warns you if it's outdated.
-- A "Check yt-dlp Version" option is available in the Settings menu to check on demand.
-- Uses the PyPI API with a 3-second timeout so startup isn't blocked by network issues.
-
-### Safer Feed Refresh
-The "Refresh" action in Your Feed no longer overwrites your current feed if the fetch fails (e.g. due to cookie locking from an open browser). You'll see a notification and keep your existing feed instead of a blank screen.
-
-### Faster Feed Refresh
-Feed refresh now limits the fetch to one page of results instead of downloading the entire feed, making it significantly faster.
-
----
-
-## Features
-
-- **Interactive Menu**: Text-based UI using `fzf` or `rofi` for seamless navigation.
-- **YouTube-Specific Menus**: Access your feed, trending videos, playlists, watch later, subscriptions feed, liked videos, clips.
-- **Playback Support**: Play videos and audio via `mpv` or `vlc`.
-- **Search Functionality**: Search for videos, channels and playlists directly.
-- **Channel Exploration**: Explore channels, including their videos, streams, podcasts, shorts, and playlists.
-- **Saved Channels**: Bookmark your favorite channels for quick access, with support for importing existing subscriptions.
-- **Saved Videos**: Save videos to watch later.
-- **Mixes**: Generate and explore YouTube song mixes.
-- **Yt-x Shell:** Run custom yt-dlp and mpv commands for downloading and viewing videos and playlists
-- **Custom Playlists**: Save playlists for easier access.
-- **Download Management**: Download videos, audio, and playlists using `yt-dlp`.
-- **History & Recents**: Track your recent videos and search history.
-- **Configuration Management**: Customize and manage configurations for yt-x, mpv and yt-dlp with ease.
-- **Extensions:** Extend yt-x with your own custom ui and preview logic allowing more precise coverage of other sites that yt-dlp supports
-- **Custom Commands:** Basically a simple way to achieve the same thing with extensions. A custom command is just a yt-dlp command that loads a playlist or playlist like json.
-- **Miscellaneous Features**:
-  - Shell completions for `bash`, `zsh`, and `fish`.
-  - Desktop entry generation for easy access.
-
 ## Installation
 
-### From this fork
+### Any Linux distro or macOS (one line)
 
 ```bash
-# Clone and run directly
-git clone https://github.com/jkpair/yt-x-plus.git
-cd yt-x-plus
-./yt-x
-
-# Or copy to your PATH
-cp yt-x ~/.local/bin/yt-x
+curl -fsSL https://github.com/jkpair/yt-x-plus/releases/latest/download/install.sh | sh
 ```
+
+This installs a static binary to `/usr/local/bin` (it asks for sudo if
+needed) and then checks your dependencies. Install for your user only with
+`| sh -s -- --user` (to `~/.local/bin`).
+
+### Packages
+
+Each [release](https://github.com/jkpair/yt-x-plus/releases/latest) has
+packages for the common package managers. They include shell completions, a
+desktop entry and the example plugin:
+
+```bash
+# Debian / Ubuntu / Mint / Pop!_OS
+sudo apt install ./yt-x_*_linux_amd64.deb
+
+# Fedora / openSUSE / RHEL
+sudo dnf install ./yt-x_*_linux_amd64.rpm
+
+# Arch / Manjaro / EndeavourOS / CachyOS
+sudo pacman -U ./yt-x_*_linux_amd64.pkg.tar.zst
+
+# Alpine
+sudo apk add --allow-untrusted ./yt-x_*_linux_amd64.apk
+```
+
+Builds are available for `amd64`, `arm64` and `armv7` (e.g. Raspberry Pi).
+Plain binaries (`yt-x-linux-amd64`, …) and tarballs are attached too.
 
 ### Nix
 
 ```bash
-# Run without installing
 nix run github:jkpair/yt-x-plus
-
-# Install
 nix profile install github:jkpair/yt-x-plus
-
-# Development shell
-nix develop github:jkpair/yt-x-plus
 ```
 
-### From upstream (original yt-x)
+### From source
 
-See the [upstream repository](https://github.com/Benexl/yt-x) for AUR and other installation methods.
+```bash
+git clone https://github.com/jkpair/yt-x-plus.git
+cd yt-x-plus
+go build -o bin/yt-x ./cmd/yt-x
+```
+
+Requires Go 1.26+. Build into `bin/`: the `yt-x` file at the repository root
+is the migration script for old Bash installs (see below).
+
+### Updating
+
+```bash
+yt-x --update
+```
+
+This replaces the binary with the latest release. Installs from distro
+packages or Nix should update through the package manager instead.
+
+#### Coming from the Bash version
+
+Run "Check for Updates" (or `yt-x -U`) once. The old updater downloads a small
+migration script, which swaps itself for the Go binary. Your config, themes,
+saved videos, recent list, subscriptions, custom playlists, custom commands
+and search history are read as they are. Two things are gone: rofi support,
+and sourced Bash extensions (replaced by [Lua plugins](#plugins)).
 
 ## Dependencies
 
-### Required
+Required:
 
-- [jq](https://github.com/jqlang/jq) - JSON parsing.
-- [curl](https://curl.se/) - Download preview images.
-- [yt-dlp](https://github.com/yt-dlp/yt-dlp) - Fetch YouTube data.
-- [fzf](https://github.com/junegunn/fzf) - Main UI navigation.
-- [mpv](https://mpv.io/) - Video and audio playback.
-- [ffmpeg](https://www.ffmpeg.org/) - Proper HLS stream downloading.
-- [bash](https://www.gnu.org/software/bash/) - Script interpreter.
-- [nerdfont](https://www.nerdfonts.com/) - for the icons
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp): fetching YouTube data and streams
+- [mpv](https://mpv.io/) (or vlc): playback
+- [ffmpeg](https://www.ffmpeg.org/): merging and converting downloads
+- a [Nerd Font](https://www.nerdfonts.com/) for the icons
 
-### Optional
+Optional: `chafa` (alternative thumbnail renderer), `notify-send`
+(notifications), and `wl-copy`, `xclip` or `xsel` (Copy Link).
 
-- [gum](https://github.com/charmbracelet/gum) - Enhanced UI (highly recommended).
-- [rofi](https://github.com/davatorium/rofi) - Alternate UI.
-- **clipboard tool** (for Copy Link):
-  - [wl-clipboard](https://github.com/bugaevc/wl-clipboard) - Wayland (recommended for Wayland sessions)
-  - [xclip](https://github.com/astrand/xclip) - X11
-  - [xsel](https://github.com/kfish/xsel) - X11
-- **terminal image viewer:**
-  - [chafa](https://github.com/hpjansson/chafa) - Cross-terminal image rendering (recommended).
-  - [icat](https://sw.kovidgoyal.net/kitty/kittens/icat/) - recommended for kitty terminal and ghostty
-  - [imgcat](https://github.com/danielgatis/imgcat)
-- **terminal with image rendering support:**
-  - [kitty](https://sw.kovidgoyal.net/kitty/) - currently has the best image rendering capabilities (recommended)
-  - [wezterm](https://wezfurlong.org/wezterm/index.html)
-  - [ghostty](https://github.com/ghostty-org/ghostty)
+`yt-x --check-deps` shows what is installed and which image protocol your
+terminal gets. `yt-x --install` installs anything missing with your package
+manager (pacman, apt, dnf, zypper, xbps, apk, emerge, brew or Termux).
 
----
+## Features
+
+- **Your YouTube:** feed, subscriptions feed, playlists, watch later, liked
+  videos, watch history and clips (using your browser's cookies).
+- **Search** with [filters](#search-filters) such as `:week`, `:4k` and
+  `:newest`.
+- **Channels:** videos, shorts, streams, podcasts, playlists, featured and
+  in-channel search. Keep a local channel list or import your subscriptions.
+- **Thumbnails** in a preview pane, drawn with the best protocol your terminal
+  supports:
+  - Kitty graphics: kitty, Ghostty
+  - Sixel: foot, WezTerm, Konsole, Windows Terminal
+  - iTerm2 inline images
+  - truecolor half-blocks everywhere else (including tmux)
+
+  They load in the background, visible rows first, and appear as soon as they
+  arrive.
+- **Playback** in mpv or vlc. Watch, listen (audio only), play or listen to a
+  whole list, and YouTube mixes. Resumes where you stopped.
+- **Background downloads** with a progress queue: single videos, whole lists,
+  channels, search results or any URL, as video or mp3. SponsorBlock,
+  embedded subtitles, chapters and thumbnails, and codec/HDR preferences are
+  set in the config.
+- **Local library:** browse and play your downloads, and build local mixes
+  from them.
+- **Library:** saved videos, recently played, custom playlists, search
+  history, and custom yt-dlp commands that load any playlist-like JSON.
+- **Multi-select:** `tab` marks videos, `enter` plays, downloads or saves them
+  together.
+- **Lua plugins** for your own menus, video actions and hooks.
+- **21 themes**, switchable live from Settings.
+- Shell completions, a desktop entry, and self-update.
+
+### Keys
+
+| Key | Action |
+| --- | --- |
+| type | filter the current list |
+| `↑` `↓` / `ctrl+p` `ctrl+n` | move |
+| `enter` / `→` | select |
+| `esc` | clear the filter, or go back |
+| `tab` | mark a video (multi-select) |
+| `shift+←` `shift+→` / `pgup` `pgdn` | page up / down |
+| `ctrl+d` | download |
+| `ctrl+s` | save |
+| `ctrl+o` | open in browser |
+| `ctrl+y` | copy link |
+| `ctrl+r` | reload |
+| `ctrl+c` | quit |
 
 ## Usage
 
 ```bash
-# Launch the UI
-yt-x
-
-# Edit configuration
-yt-x -e
-
-# load an extension
-# extensions are located at ~/.config/yt-x/extensions
-# the extension name is the name of a file in the extensions folder
-yt-x -x <extension-name>
-
-# Specify player at runtime
-yt-x --player <mpv/vlc>
-
-# Set selector at runtime
-yt-x -s <fzf/rofi>
-
-# Specify Rofi theme path
-yt-x --rofi-theme <path>
-
-# Enable/disable preview
-yt-x --preview / yt-x --no-preview
-
-# Print desktop entry
-yt-x -E
-
-# Print shell completions
-yt-x completions --bash
-yt-x completions --zsh
-yt-x completions --fish
-
-# Update the script
-yt-x --update
-
-# Display help
+yt-x                          # launch
+yt-x -S ":week linux news"    # search directly
+yt-x -e                       # edit the config
+yt-x -p vlc                   # use vlc for this run
+yt-x --theme nord             # pick a theme for this run (--list-themes to see all)
+yt-x --no-preview             # hide the preview pane
+yt-x -x example               # load a Lua plugin
+yt-x completions --fish       # print shell completions (--bash, --zsh)
 yt-x --help
 ```
 
----
+## Configuration
 
-## Tips
+The config lives at `~/.config/yt-x/yt-x.conf` (`yt-x -e` or Settings → Edit
+Config). Every option is documented in the file. Highlights:
 
-### Enabling Imports of Subscriptions & Private Playlists
+```ini
+THEME: everforest-dark-hard
+ENABLE_PREVIEW: true
+IMAGE_RENDERER: auto        # auto, kitty, sixel, iterm, halfblock or chafa
+PLAYER: mpv
+PREFERRED_BROWSER: firefox  # browser to read YouTube cookies from
+COOKIE_FILE:                # cookies.txt fallback
+DOWNLOAD_DIRECTORY: ~/Videos/yt-x
+SPONSORBLOCK: false
+RESUME_PLAYBACK: true
+```
 
-Set your preferred browser in the configuration file:
+Themes: see [themes/README.md](themes/README.md). Put your own `*.theme` files
+in `~/.config/yt-x/themes/`.
+
+### Enabling subscriptions and private playlists
+
+Set your browser in the config, or pick it from Settings → Select Browser
+(yt-x tests that cookie extraction works):
 
 ```ini
 PREFERRED_BROWSER: firefox
 ```
 
-To enable `mpv` to access private playlists and videos, add something like this to `mpv.conf` (you can also use the ui to edit `mpv.conf`):
-
-```ini
-ytdl-raw-options=cookies-from-browser=firefox
-
-# --- bonus mpv tips ---
-
-# define the quality for mpv to use
-ytdl-format="bestvideo[vcodec^=avc1][height=1080]+bestaudio/best[vcodec^=avc1][height=1080]/bestvideo[vcodec^=avc1][height=720]+bestaudio/best[vcodec^=avc1][height=720]/best"
-
-# defines where screenshots will be saved
-screenshot-directory=~/Pictures/mpv_screenshots/
-
-# enable hardware accelaration
-hwdec=auto
-vo=gpu
-
-# for subs something like this
-slang=en,eng,enUS,en-US
-sub-auto=fuzzy
-ytdl-raw-options=ignore-config=,sub-lang="en,eng,enUS,en-US",write-sub=,write-auto-sub=
-```
-
-To customise download options with yt-dlp you can add something like this to `yt-dlp.conf` (you can also use the ui to edit `yt-dlp.conf`)
+If yt-dlp reports "cannot decrypt cookies", include the profile and keyring,
+e.g. `PREFERRED_BROWSER: brave+gnomekeyring:Default`. Check a value with:
 
 ```bash
--f bestvideo[vcodec^=avc1][height=1080]+bestaudio/best[vcodec^=avc1][height=1080]/bestvideo[vcodec^=avc1][height=720]+bestaudio/best[vcodec^=avc1][height=720]/best
---embed-chapters
---sponsorblock-mark all
---embed-metadata
---embed-thumbnail
---add-metadata
---embed-subs
---sub-lang en
---merge-output-format mkv
+yt-dlp --cookies-from-browser "brave+gnomekeyring:Default" --skip-download --flat-playlist "https://www.youtube.com/feed/channels"
 ```
 
 > [!TIP]
-> I also recommend setting up a po token. read more here https://github.com/yt-dlp/yt-dlp/wiki/PO-Token-Guide
->
-> Recommended plugin to help you with that https://github.com/Brainicism/bgutil-ytdlp-pot-provider
+> Setting up a PO token makes YouTube much less likely to block yt-dlp. See the
+> [PO Token Guide](https://github.com/yt-dlp/yt-dlp/wiki/PO-Token-Guide) and
+> [bgutil-ytdlp-pot-provider](https://github.com/Brainicism/bgutil-ytdlp-pot-provider).
 
-For additional enhancements, consider:
+### mpv and yt-dlp tips
 
-- [uosc](https://github.com/tomasklaen/uosc) for a modern `mpv` UI.
-- [thumbfast](https://github.com/po5/thumbfast) for thumbnail timeline previews.
+yt-x passes your cookies and its yt-dlp options (SponsorBlock etc.) to mpv
+automatically. You can still tune mpv in `mpv.conf` (Settings → Edit MPV
+Config):
 
-### Fixing "cannot decrypt cookies" error synchronizing subscriptions
-
-If you find this error while trying to synchronize your YouTube subscriptions ("Miscellaneous" > "Sync YouTube Subscriptions" option in yt-x):
-
-```bash
-Syncing subscriptions... WARNING: cannot decrypt v11 cookies: no key found WARNING: [youtube:tab] unable to extract yt initial data; please report this issue on https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using yt-dlp -U WARNING: [youtube:tab] Incomplete yt initial data received. Retrying (1/3)...
+```ini
+ytdl-format="bestvideo[height<=1080]+bestaudio/best"
+hwdec=auto
+slang=en,eng
 ```
 
-You can fix it by setting the [yt-dlp](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#general-options) `--cookies-from-browser` option in your `yt-x.conf` file ("Edit Config." option in yt-x) to match your browser and profile. For example, if you use Brave's default profile with GNOME Keyring, configure this `PREFERRED_BROWSER` value in your `yt-x.conf` file:
+Download defaults can go in yt-dlp's own config (Settings → Edit yt-dlp
+Config), for example `--embed-metadata` or `--merge-output-format mkv`.
 
-```bash
-PREFERRED_BROWSER: brave+gnomekeyring:Default
-```
+For a nicer player, try [uosc](https://github.com/tomasklaen/uosc) and
+[thumbfast](https://github.com/po5/thumbfast).
 
-To find the correct `PREFERRED_BROWSER` value for your browser and profile, use the yt-dlp `--cookies-from-browser` option in terminal. In the previous example, with Brave and GNOME Keyring, the following command should correctly extract your Brave browsers cookies:
+### Custom playlists
 
-```bash
-yt-dlp \
-  --cookies-from-browser "brave+gnomekeyring:Default" \
-  --skip-download \
-  --flat-playlist \
-  "https://www.youtube.com/feed/channels" \
-```
-
-In your tests, replace `brave+gnomekeyring:Default` with your browser and profile. For more details, refer to the [yt-dlp documentation](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#general-options).
-
-> [!NOTE]
-> This is not an issue with yt-x itself, but rather with yt-dlp's ability to access browser cookies.
-
-## Custom Playlists
-
-Define custom playlists by editing `~/.config/yt-x/custom_playlists.json` (or use the UI):
+Save any playlist from its action menu (Save Playlist), or edit
+`~/.config/yt-x/custom_playlists.json`:
 
 ```json
 [
@@ -254,59 +231,57 @@ Define custom playlists by editing `~/.config/yt-x/custom_playlists.json` (or us
   }
 ]
 ```
-## Theming
-To change the default colorscheme, set `YT_X_FZF_OPTS` env var and give it custom fzf opts.
 
-eg. (.bashrc)
+## Plugins
 
+Plugins are Lua files in `~/.config/yt-x/plugins/`. Load one for a run with
+`yt-x -x <name>`, or on every start with `AUTO_LOADED_EXTENSIONS: name1,name2`
+in the config. A plugin can add main-menu entries and video actions, hook
+`play` / `download` / `search`, run searches and open the results in the
+normal list (with previews), and play, download or open URLs.
+
+```lua
+yt.video_action("Short videos from this channel", function(video)
+  local videos = yt.ytdlp(video.channel_url .. "/videos", 60) or {}
+  local short = {}
+  for _, v in ipairs(videos) do
+    if v.duration_seconds and v.duration_seconds < 600 then table.insert(short, v) end
+  end
+  yt.show_list(video.channel .. " · under 10 min", short)
+end)
 ```
-#yt-x
-export YT_X_FZF_OPTS=$FZF_DEFAULT_OPTS'
---color=fg:#e0def4,fg+:#e0def4,bg:#232136,bg+:#44415a
---color=hl:#3e8fb0,hl+:#9ccfd8,info:#f6c177,marker:#3e8fb0
---color=prompt:#eb6f92,spinner:#c4a7e7,pointer:#c4a7e7,header:#3e8fb0
---color=border:#44415a,label:#ea9a97,query:#f6c177
---border="rounded" --border-label="" --preview-window="border-rounded" --prompt="> "
---marker=">" --pointer="◆" --separator="─" --scrollbar="│"'
+
+The full API is documented in [plugins/example.lua](plugins/example.lua).
+
+## Search filters
+
+Start a search with one `:filter`: `:filter your query`.
+
+| Filter | Description |
+| --- | --- |
+| `:hour` `:today` `:week` `:month` `:year` | upload date |
+| `:video` `:playlist` `:movie` `:live` | result type |
+| `:short` `:long` | under / over 4 minutes |
+| `:hd` `:4k` `:hdr` `:360` `:vr` `:3d` | quality and format |
+| `:subtitles` | has subtitles/CC |
+| `:local` | filtered by location |
+| `:views` `:rating` `:newest` | sort order |
+
+## Development
+
+```bash
+nix develop               # or install Go 1.26+
+go test -race ./...
+go build -o bin/yt-x ./cmd/yt-x
 ```
 
-## Extended search
- While searching, you can prefix your query with a `:command` to filter your search request: `:<command> your_query`. Only one command can be used per query.
-
-### List of commands
-
-| Command        | Description                                |
-|----------------|--------------------------------------------|
-| `:hour`        | Videos uploaded in the last hour           |
-| `:live`        | Show only live streams                     |
-| `:video`       | Show only videos                           |
-| `:today`       | Videos uploaded today                      |
-| `:week`        | Videos uploaded this week                  |
-| `:month`       | Videos uploaded this month                 |
-| `:year`        | Videos uploaded this year                  |
-| `:short`       | Short videos (< 4 minutes)                 |
-| `:long`        | Long videos (> 4 minutes)                  |
-| `:playlist`    | Show playlists only                        |
-| `:movie`       | Movies                                     |
-| `:hd`          | HD videos                                  |
-| `:4k`          | 4K videos                                  |
-| `:hdr`         | HDR videos                                 |
-| `:subtitles`   | Videos with subtitles/CC                   |
-| `:360`         | 360 videos                                 |
-| `:vr`          | VR180 videos                               |
-| `:3d`          | 3D videos                                  |
-| `:local`       | Videos filtered by location                |
-
-### Sorting Options
-| Command        | Description                                |
-|----------------|--------------------------------------------|
-| `:views`       | Sort results by view count                 |
-| `:rating`      | Sort results by rating                     |
-| `:newest`      | Sort results by upload date                |
+Releases are built by GitHub Actions with [GoReleaser](https://goreleaser.com)
+when a `v*` tag is pushed (`.goreleaser.yaml`).
 
 ## Credits
 
-Based on [yt-x](https://github.com/Benexl/yt-x) by [Benexl](https://github.com/Benexl).
+Based on [yt-x](https://github.com/Benexl/yt-x) by
+[Benexl](https://github.com/Benexl).
 
 ## Support
 
