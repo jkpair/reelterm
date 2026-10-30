@@ -136,7 +136,9 @@ func run() error {
 
 	p := tea.NewProgram(root, tea.WithAltScreen(), tea.WithMouseCellMotion())
 	thumbs.Send = p.Send
-	if _, err := p.Run(); err != nil {
+	_, err = p.Run()
+	tui.ResetTerminalColors()
+	if err != nil {
 		return err
 	}
 	byebye(env)

@@ -34,3 +34,13 @@ func TestParseHexComment(t *testing.T) {
 		t.Errorf("blue = %v", th.Blue)
 	}
 }
+
+func TestTerminalColors(t *testing.T) {
+	th := Parse("x", "FZF_COLORS='--color=fg:#4c4f69,bg:#eff1f5'\n")
+	if got, want := th.TerminalColors(), "\x1b]10;#4c4f69\x1b\\\x1b]11;#eff1f5\x1b\\"; got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+	if got := Parse("x", "").TerminalColors(); got != "" {
+		t.Errorf("no fzf colors: got %q", got)
+	}
+}

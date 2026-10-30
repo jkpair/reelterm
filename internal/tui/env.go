@@ -2,7 +2,10 @@
 package tui
 
 import (
+	"os"
+
 	"github.com/charmbracelet/lipgloss"
+	"golang.org/x/term"
 
 	"github.com/jkpair/reelterm/internal/app"
 	"github.com/jkpair/reelterm/internal/cache"
@@ -58,6 +61,20 @@ type Env struct {
 func (e *Env) SetTheme(t *theme.Theme) {
 	e.Theme = t
 	e.S = NewStyles(t, e.Cfg.PrettyPrint)
+	if e.Cfg.PrettyPrint {
+		writeTerminal(t.TerminalColors())
+	} else {
+		ResetTerminalColors()
+	}
+}
+
+// ResetTerminalColors undoes the default fg/bg set by SetTheme.
+func ResetTerminalColors() { writeTerminal(theme.ResetTerminalColors) }
+
+func writeTerminal(seq string) {
+	if seq != "" && term.IsTerminal(int(os.Stdout.Fd())) {
+		os.Stdout.WriteString(seq)
+	}
 }
 
 // Styles are the lipgloss styles derived from a theme.
@@ -70,6 +87,7 @@ type Styles struct {
 	Pointer     lipgloss.Style
 	Selected    lipgloss.Style
 	Match       lipgloss.Style
+	MatchSel    lipgloss.Style
 	Section     lipgloss.Style
 	SectionRule lipgloss.Style
 	Border      lipgloss.Style
@@ -86,7 +104,7 @@ type Styles struct {
 func NewStyles(t *theme.Theme, color bool) Styles {
 	n := lipgloss.NewStyle()
 	if !color {
-		return Styles{T: t, Fg: n, Dim: n, Header: n, Prompt: n, Pointer: n, Selected: n.Reverse(true), Match: n.Underline(true),
+		return Styles{T: t, Fg: n, Dim: n, Header: n, Prompt: n, Pointer: n, Selected: n.Reverse(true), Match: n.Underline(true), MatchSel: n.Underline(true),
 			Section: n, SectionRule: n, Border: n, Title: n.Bold(true), Label: n.Bold(true), Info: n, Warn: n, Error: n, OK: n, Status: n, Key: n.Bold(true)}
 	}
 	return Styles{
@@ -98,6 +116,7 @@ func NewStyles(t *theme.Theme, color bool) Styles {
 		Pointer:     n.Foreground(t.Pointer).Background(t.BgSel),
 		Selected:    n.Foreground(t.FgSel).Background(t.BgSel).Bold(true),
 		Match:       n.Foreground(t.Highlight).Bold(true),
+		MatchSel:    n.Foreground(t.HighlightSel).Background(t.BgSel).Bold(true),
 		Section:     n.Foreground(t.Dim),
 		SectionRule: n.Foreground(t.Gray),
 		Border:      n.Foreground(t.Border),

@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
@@ -26,7 +27,7 @@ type Theme struct {
 	Red, Green, Yellow, Blue, Magenta, Cyan, Orange, Gray, White, Dim lipgloss.TerminalColor
 
 	// From the FZF_COLORS block.
-	Fg, FgSel, Bg, BgSel, Highlight, Prompt, Pointer, Header, Border, Info lipgloss.TerminalColor
+	Fg, FgSel, Bg, BgSel, Highlight, HighlightSel, Prompt, Pointer, Header, Border, Info lipgloss.TerminalColor
 
 	Icons map[string]string
 	Box   map[string]string
@@ -121,6 +122,7 @@ func Parse(key, data string) *Theme {
 	t.Bg = pick("bg", lipgloss.NoColor{})
 	t.BgSel = pick("bg+", t.Gray)
 	t.Highlight = pick("hl", t.Green)
+	t.HighlightSel = pick("hl+", t.Highlight)
 	t.Prompt = pick("prompt", t.Red)
 	t.Pointer = pick("pointer", t.Magenta)
 	t.Header = pick("header", t.Blue)
@@ -149,6 +151,21 @@ var defaultIcons = map[string]string{
 	"settings": "\uF013", "config": "\uF044", "exit": "\U000F0206", "play": "\uF04B",
 	"download": "\uF019", "audio": "\uF001", "back": "\U000F030D", "menu": "\U000F035C",
 	"next": "\uF061", "previous": "\uF060", "reload": "\uF021",
+}
+
+// ResetTerminalColors restores the terminal's own default colors (OSC 110/111).
+const ResetTerminalColors = "\x1b]110\x1b\\\x1b]111\x1b\\"
+
+// TerminalColors returns OSC 10/11 sequences that make the theme's fg/bg the
+// terminal's default colors, so unstyled text and empty cells match the theme.
+func (t *Theme) TerminalColors() string {
+	var b strings.Builder
+	for i, c := range []lipgloss.TerminalColor{t.Fg, t.Bg} {
+		if h, ok := c.(lipgloss.Color); ok && hexRe.MatchString(string(h)) {
+			b.WriteString("\x1b]" + strconv.Itoa(10+i) + ";" + string(h) + "\x1b\\")
+		}
+	}
+	return b.String()
 }
 
 // Icon returns an icon by lowercase name.
