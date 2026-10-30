@@ -1,46 +1,36 @@
 {
   lib,
-  stdenvNoCC,
+  buildGoModule,
   makeWrapper,
   yt-dlp,
-  jq,
-  fzf,
   mpv,
   ffmpeg,
-  gum,
+  chafa,
 }:
-let
-  deps = [
-    yt-dlp
-    jq
-    fzf
-    mpv
-    ffmpeg
-    gum
-  ];
-in
-stdenvNoCC.mkDerivation {
+buildGoModule {
   pname = "yt-x";
-  version = "0.5.1";
-  src = ./.;
+  version = "1.0.0";
+  src = lib.cleanSource ./.;
+
+  # After changing go.mod/go.sum, set this to lib.fakeHash, run `nix build`,
+  # and paste the hash from the error message.
+  vendorHash = lib.fakeHash;
+
+  subPackages = [ "cmd/yt-x" ];
+  ldflags = [ "-s" "-w" "-X github.com/jkpair/yt-x-plus/internal/app.Version=1.0.0" ];
 
   nativeBuildInputs = [ makeWrapper ];
 
-  installPhase = ''
-    runHook preInstall
-
-    install -Dm755 yt-x -t $out/bin
+  postInstall = ''
     wrapProgram $out/bin/yt-x \
-      --prefix PATH : ${lib.makeBinPath deps}
-
-    # Install built-in themes
-    if [ -d themes ]; then
-      mkdir -p $out/share/yt-x/themes
-      cp themes/*.theme $out/share/yt-x/themes/
-    fi
-
-    runHook postInstall
+      --prefix PATH : ${lib.makeBinPath [ yt-dlp mpv ffmpeg chafa ]}
+    install -Dm644 plugins/example.lua -t $out/share/yt-x/plugins
   '';
 
-  meta.mainProgram = "yt-x";
+  meta = {
+    description = "Browse YouTube from your terminal";
+    homepage = "https://github.com/jkpair/yt-x-plus";
+    license = lib.licenses.mit;
+    mainProgram = "yt-x";
+  };
 }

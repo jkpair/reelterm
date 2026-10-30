@@ -4,97 +4,39 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-yt-x is a terminal-based YouTube browser and downloader written in pure Bash (~4,500 lines). It provides an interactive TUI for browsing YouTube, searching, streaming videos, downloading content, and managing playlists using fzf/rofi, yt-dlp, and mpv/vlc.
+yt-x is a terminal-based YouTube browser and downloader written in Go (`cmd/yt-x`, `internal/`, Bubble Tea UI). It was a single Bash script until v1.0.0. yt-dlp, mpv/vlc and ffmpeg are external processes.
 
-## Build & Run Commands
+The root `yt-x` file is **not** the program: it is a small Bash migration script that old Bash installs download through their self-updater, which swaps itself for the release binary. Keep its `CLI_VERSION="x.y.z"` line (the old updater compares it) and always build with `-o bin/yt-x` so it isn't overwritten.
 
-```bash
-# Run directly
-./yt-x
-
-# Nix development shell (includes all dependencies)
-nix develop
-
-# Nix build
-nix build
-
-# Install via Nix
-nix profile install github:jkpair/yt-x-plus
-
-# Debug mode
-YT_X_DEBUG=1 ./yt-x
-```
-
-## Common CLI Options
+## Build, test, release
 
 ```bash
-./yt-x --search "query"           # Direct search
-./yt-x -x <extension>             # Load extension (name or full path)
-./yt-x --player mpv|vlc           # Set video player
-./yt-x --selector fzf|rofi        # Set UI selector
-./yt-x --preview / --no-preview   # Toggle video preview
-./yt-x --theme <name>             # Set color theme
-./yt-x --list-themes              # List available themes
-./yt-x -e                         # Edit config file
-./yt-x completions --fish|bash|zsh # Generate shell completions
+go build -o bin/yt-x ./cmd/yt-x   # build (bin/ is gitignored)
+go test -race ./...                # tests
+go vet ./...
 ```
 
-## Architecture
+Packages under `internal/`:
 
-**Single-file Bash script** (`yt-x`) containing all functionality:
+- `app`: version (set via `-ldflags -X .../internal/app.Version=`), XDG paths
+- `config`: `yt-x.conf` parsing/writing (same `KEY: value` format as Bash); `Set()` edits in place
+- `theme`: parses the shell-variable `themes/*.theme` files (embedded via `themes/embed.go`) into lipgloss colors; hex comments beside 256-color codes are preferred
+- `ytdlp`: yt-dlp wrapper (`Fetch` = run_yt_dlp with cookie-file fallback, `BuildOpts` = build_ytdlp_opts), `Entry`/`Playlist` JSON models and formatting
+- `youtube`: URL builders, search `:filter` → `sp=` mapping, oEmbed
+- `cache`: on-disk store (feed cache, metadata, recent/saved/subscriptions JSON, search history, custom playlists/commands, m3u); file names match the Bash version
+- `thumb`: thumbnail download pool, protocol detection, renderers (kitty/sixel/iTerm2/half-block/chafa) and overlay placement
+- `player`: mpv/vlc/Android command building, stderr classification, clipboard/open/notify helpers
+- `download`: background yt-dlp jobs with progress parsed from `--progress-template`
+- `plugin`: gopher-lua (Lua 5.1) runtime exposing the `yt` table; see `plugins/example.lua`
+- `selfupdate`: GitHub release check and binary replacement (assets named `yt-x-<os>-<arch>`)
+- `deps`: dependency report/installer, `--install-self`
+- `tui`: screens on a stack in `Root` (`push`/`pop`/`replace` messages). `Menu` is the generic fzf-style list, `VideoList` the browsing screen with the preview pane
 
-1. **Initialization (lines 1-49):** Platform detection, directory setup
-2. **Configuration (lines 50-490):** `print_config()`, `load_config()`, `build_ytdlp_opts()`
-3. **Utilities (lines 491-2787):** feed cache and live updater, update check, UI functions (`launcher()`, `launcher_with_preview()`), preview generation, themes, yt-dlp wrapper, dependency checks/installer
-4. **Core Logic (lines 2788-3634):** `playlist_explorer()`, `playlists_explorer()`, `channels_explorer()`
-5. **Main Menu & CLI (lines 3635+):** `main()` loop, `usage()`, argument parsing, shell completions
+**Thumbnail overlays (important):** Kitty/Sixel/iTerm2 images are written straight to stdout by `thumb.Manager.HandleDraw`, outside Bubble Tea's renderer. The preview pane reserves the image cells with `ansi.CursorForward` instead of spaces, so the renderer's line rewrites skip them. That's why `Root.View` splits and pads lines by hand (never wrap such lines in lipgloss, which would pad them), and why list rows leave the last column free. Draws are debounced 40ms via `Manager.Send` so queued frames flush first. Half-block/chafa render as ordinary text.
 
-Line numbers drift; grep for `^name() {` to find a function.
+**Nerd Font icons:** write private-use codepoints as `\uXXXX`/`\UXXXXXXXX` escapes in Go (and `\ddd` byte escapes in Lua 5.1). Literal glyphs get lost by some editing tools.
 
-**Extension System:** Extensions in `~/.config/yt-x/extensions/` are sourced into the script and can override `main()`. Examples in `extensions/` directory.
-
-## Key Functions
-
-- `main()` - Main menu loop with all features
-- `launcher()` / `launcher_with_preview()` - fzf/rofi menu selection
-- `run_yt_dlp()` - Execute yt-dlp with configured options
-- `playlist_explorer()` - Browse and play videos from playlists/search results
-- `channels_explorer()` - Browse channel content
-- `load_config()` - Load configuration from `~/.config/yt-x/yt-x.conf`
-
-## Key Variables
-
-```bash
-CLI_CONFIG_DIR="${XDG_CONFIG_HOME:-"$HOME"/.config}/$CLI_NAME"
-CLI_EXTENSION_DIR="$CLI_CONFIG_DIR/extensions"
-CLI_THEMES_DIR="$CLI_CONFIG_DIR/themes"
-CLI_BUILTIN_THEMES_DIR="$CLI_DIR/themes"
-CLI_CACHE_DIR="${XDG_CACHE_HOME:-"$HOME"/.cache}/$CLI_NAME"
-```
-
-## Theme System
-
-yt-x supports a comprehensive theming system. Themes define terminal colors, fzf styling, and icons.
-
-**Built-in themes:** 21 in `themes/` (default `everforest-dark-hard`); run `./yt-x --list-themes` for the full list
-
-**Theme locations:**
-- User themes: `~/.config/yt-x/themes/`
-- Built-in themes: `<yt-x-dir>/themes/`
-
-**Key functions:**
-- `load_theme()` - Load a theme file and set colors
-- `list_themes()` - List all available themes
-- `init_pretty_print()` - Initialize colors (uses theme system)
-
-**Configuration:** Set `THEME: <name>` in `~/.config/yt-x/yt-x.conf`
-
-See `themes/README.md` for creating custom themes.
-
-## Dependencies
-
-**Required:** yt-dlp, jq, fzf, mpv, ffmpeg, bash, nerdfont
-**Optional:** gum, rofi, chafa/icat/imgcat (image preview)
+**Releases:** bump `Version` in `internal/app/app.go`, `version` in `default.nix` and `CLI_VERSION` in the root `yt-x` script, then push a `v*` tag to the `fork` remote (jkpair/yt-x-plus). `.github/workflows/release.yml` runs GoReleaser (`.goreleaser.yaml`): static binaries `yt-x-<os>-<arch>` (used by `--update`, `install.sh` and the migration script), tarballs, deb/rpm/apk/Arch packages, `install.sh` and checksums. Test locally with `goreleaser release --snapshot --clean`. Nix: `default.nix` (`vendorHash` must be updated after dependency changes).
 
 ## Search Filters
 

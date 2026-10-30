@@ -23,7 +23,7 @@ yt-x supports a comprehensive theming system that allows you to customize colors
 Themes are loaded from these locations (in order of priority):
 
 1. **User themes:** `~/.config/yt-x/themes/`
-2. **Built-in themes:** `<yt-x-install-dir>/themes/`
+2. **Built-in themes:** compiled into the yt-x binary (`yt-x --list-themes`)
 
 User themes with the same name will override built-in themes.
 

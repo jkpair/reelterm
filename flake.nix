@@ -10,13 +10,11 @@
     { nixpkgs, flake-utils, self, ... }:
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = nixpkgs.legacyPackages.${system};
-      deps = with pkgs; [
+      runtimeDeps = with pkgs; [
         yt-dlp
-        jq
-        fzf
         mpv
         ffmpeg
-        gum
+        chafa
       ];
     in
     {
@@ -25,8 +23,13 @@
         yt-x = pkgs.callPackage ./default.nix { };
       };
 
-      devShells.default = pkgs.mkShellNoCC {
-        packages = deps;
+      devShells.default = pkgs.mkShell {
+        packages = runtimeDeps ++ (with pkgs; [
+          go
+          gopls
+          golangci-lint
+          goreleaser
+        ]);
       };
     });
 }

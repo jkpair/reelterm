@@ -27,3 +27,8 @@ log.txt
 .claude/
 .env
 repomix-output.xml
+
+# Go build output
+/bin/
+/dist/
+/completions/
