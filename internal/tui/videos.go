@@ -12,10 +12,10 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/x/ansi"
 
-	"github.com/jkpair/yt-x-plus/internal/cache"
-	"github.com/jkpair/yt-x-plus/internal/thumb"
-	"github.com/jkpair/yt-x-plus/internal/youtube"
-	"github.com/jkpair/yt-x-plus/internal/ytdlp"
+	"github.com/jkpair/reelterm/internal/cache"
+	"github.com/jkpair/reelterm/internal/thumb"
+	"github.com/jkpair/reelterm/internal/youtube"
+	"github.com/jkpair/reelterm/internal/ytdlp"
 )
 
 // ListKind controls how a list loads more entries.

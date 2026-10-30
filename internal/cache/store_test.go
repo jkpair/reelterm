@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jkpair/yt-x-plus/internal/app"
-	"github.com/jkpair/yt-x-plus/internal/ytdlp"
+	"github.com/jkpair/reelterm/internal/app"
+	"github.com/jkpair/reelterm/internal/ytdlp"
 )
 
 func newStore(t *testing.T) *Store {

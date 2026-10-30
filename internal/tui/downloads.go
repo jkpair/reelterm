@@ -7,10 +7,10 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/jkpair/yt-x-plus/internal/cache"
-	"github.com/jkpair/yt-x-plus/internal/download"
-	"github.com/jkpair/yt-x-plus/internal/youtube"
-	"github.com/jkpair/yt-x-plus/internal/ytdlp"
+	"github.com/jkpair/reelterm/internal/cache"
+	"github.com/jkpair/reelterm/internal/download"
+	"github.com/jkpair/reelterm/internal/youtube"
+	"github.com/jkpair/reelterm/internal/ytdlp"
 )
 
 // NewDownloadsMenu replaces the downloads* extensions.

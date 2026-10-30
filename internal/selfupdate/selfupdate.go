@@ -133,7 +133,7 @@ func Update(ctx context.Context, repo, name, current string) (string, error) {
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("download: %s", resp.Status)
 	}
-	tmp, err := os.CreateTemp(filepath.Dir(exe), ".yt-x-update-*")
+	tmp, err := os.CreateTemp(filepath.Dir(exe), ".reelterm-update-*")
 	if err != nil {
 		return "", fmt.Errorf("cannot write next to %s (try sudo, or an administrator prompt on Windows): %w", exe, err)
 	}

@@ -15,11 +15,11 @@ import (
 
 	lua "github.com/yuin/gopher-lua"
 
-	"github.com/jkpair/yt-x-plus/internal/config"
-	"github.com/jkpair/yt-x-plus/internal/player"
-	"github.com/jkpair/yt-x-plus/internal/tui"
-	"github.com/jkpair/yt-x-plus/internal/youtube"
-	"github.com/jkpair/yt-x-plus/internal/ytdlp"
+	"github.com/jkpair/reelterm/internal/config"
+	"github.com/jkpair/reelterm/internal/player"
+	"github.com/jkpair/reelterm/internal/tui"
+	"github.com/jkpair/reelterm/internal/youtube"
+	"github.com/jkpair/reelterm/internal/ytdlp"
 )
 
 type item struct {
@@ -269,7 +269,7 @@ func (r *Runtime) register() {
 		if r.result != nil {
 			r.result.Toast = msg
 		} else {
-			player.Notify("yt-x", msg)
+			player.Notify("reelterm", msg)
 		}
 		return 0
 	})

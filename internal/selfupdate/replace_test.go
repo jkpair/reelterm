@@ -8,7 +8,7 @@ import (
 
 func TestReplaceExe(t *testing.T) {
 	d := t.TempDir()
-	exe, next := filepath.Join(d, "yt-x.exe"), filepath.Join(d, "new")
+	exe, next := filepath.Join(d, "reelterm.exe"), filepath.Join(d, "new")
 	os.WriteFile(exe, []byte("old"), 0o755)
 	os.WriteFile(next, []byte("new"), 0o755)
 	if err := replaceExe(exe, next); err != nil {

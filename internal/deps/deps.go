@@ -1,4 +1,4 @@
-// Package deps checks for and installs external programs yt-x needs.
+// Package deps checks for and installs external programs reelterm needs.
 package deps
 
 import (

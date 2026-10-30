@@ -12,12 +12,16 @@ import (
 var Version = "1.0.1"
 
 const (
-	Author            = "Benexl"
+	Author            = "jkpair"
 	SupportProjectURL = "https://buymeacoffee.com/benexl"
-	Repo              = "jkpair/yt-x-plus"
+	Repo              = "jkpair/reelterm"
+
+	// LegacyName is the name used before the rename to reelterm. Its
+	// config and cache directories are moved over on first start.
+	LegacyName = "yt-x"
 )
 
-// Paths describes every directory and file yt-x reads or writes.
+// Paths describes every directory and file reelterm reads or writes.
 type Paths struct {
 	Name          string
 	ConfigDir     string
@@ -33,12 +37,12 @@ type Paths struct {
 	SearchHistory string
 }
 
-// Name returns the CLI name, overridable via YT_X_APP_NAME.
+// Name returns the CLI name, overridable via REELTERM_APP_NAME.
 func Name() string {
-	if n := os.Getenv("YT_X_APP_NAME"); n != "" {
+	if n := os.Getenv("REELTERM_APP_NAME"); n != "" {
 		return n
 	}
-	return "yt-x"
+	return "reelterm"
 }
 
 func xdg(env, fallback string) string {
@@ -50,8 +54,10 @@ func xdg(env, fallback string) string {
 	if runtime.GOOS == "windows" {
 		// Use %APPDATA% / %LOCALAPPDATA% unless an earlier install (e.g.
 		// the Bash version under Git Bash) already lives in ~/.config.
-		if _, err := os.Stat(filepath.Join(dir, Name())); err == nil {
-			return dir
+		for _, n := range []string{Name(), LegacyName} {
+			if _, err := os.Stat(filepath.Join(dir, n)); err == nil {
+				return dir
+			}
 		}
 		native := os.UserConfigDir
 		if env == "XDG_CACHE_HOME" {
@@ -64,15 +70,44 @@ func xdg(env, fallback string) string {
 	return dir
 }
 
-// NewPaths resolves the directory layout (same locations as the Bash version).
+// migrate moves base/yt-x to base/reelterm when only the old one exists.
+// If the move fails the old directory keeps being used.
+func migrate(base, name string) string {
+	dir := filepath.Join(base, name)
+	if name != "reelterm" {
+		return dir
+	}
+	old := filepath.Join(base, LegacyName)
+	if _, err := os.Stat(dir); err == nil {
+		return dir
+	}
+	if _, err := os.Stat(old); err != nil {
+		return dir
+	}
+	if err := os.Rename(old, dir); err != nil {
+		return old
+	}
+	return dir
+}
+
+// NewPaths resolves the directory layout, moving an install from before
+// the rename into place.
 func NewPaths() Paths {
 	name := Name()
-	cfg := filepath.Join(xdg("XDG_CONFIG_HOME", ".config"), name)
-	cache := filepath.Join(xdg("XDG_CACHE_HOME", ".cache"), name)
+	cfg := migrate(xdg("XDG_CONFIG_HOME", ".config"), name)
+	cache := migrate(xdg("XDG_CACHE_HOME", ".cache"), name)
+	conf := filepath.Join(cfg, name+".conf")
+	if old := filepath.Join(cfg, LegacyName+".conf"); filepath.Base(cfg) != LegacyName {
+		if _, err := os.Stat(conf); os.IsNotExist(err) {
+			_ = os.Rename(old, conf)
+		}
+	} else {
+		conf = old
+	}
 	return Paths{
 		Name:          name,
 		ConfigDir:     cfg,
-		ConfigFile:    filepath.Join(cfg, name+".conf"),
+		ConfigFile:    conf,
 		ThemesDir:     filepath.Join(cfg, "themes"),
 		PluginsDir:    filepath.Join(cfg, "plugins"),
 		CacheDir:      cache,

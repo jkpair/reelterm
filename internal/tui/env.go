@@ -4,14 +4,14 @@ package tui
 import (
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/jkpair/yt-x-plus/internal/app"
-	"github.com/jkpair/yt-x-plus/internal/cache"
-	"github.com/jkpair/yt-x-plus/internal/config"
-	"github.com/jkpair/yt-x-plus/internal/download"
-	"github.com/jkpair/yt-x-plus/internal/player"
-	"github.com/jkpair/yt-x-plus/internal/theme"
-	"github.com/jkpair/yt-x-plus/internal/thumb"
-	"github.com/jkpair/yt-x-plus/internal/ytdlp"
+	"github.com/jkpair/reelterm/internal/app"
+	"github.com/jkpair/reelterm/internal/cache"
+	"github.com/jkpair/reelterm/internal/config"
+	"github.com/jkpair/reelterm/internal/download"
+	"github.com/jkpair/reelterm/internal/player"
+	"github.com/jkpair/reelterm/internal/theme"
+	"github.com/jkpair/reelterm/internal/thumb"
+	"github.com/jkpair/reelterm/internal/ytdlp"
 )
 
 // Hooks lets the plugin layer extend menus without the tui importing it.

@@ -1,5 +1,5 @@
 {
-  description = "Browse YouTube from your terminal with yt-x";
+  description = "Browse YouTube from your terminal with reelterm";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -19,8 +19,8 @@
     in
     {
       packages = {
-        default = self.packages.${system}.yt-x;
-        yt-x = pkgs.callPackage ./default.nix { };
+        default = self.packages.${system}.reelterm;
+        reelterm = pkgs.callPackage ./default.nix { };
       };
 
       devShells.default = pkgs.mkShell {

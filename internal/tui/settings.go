@@ -11,19 +11,19 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/jkpair/yt-x-plus/internal/app"
-	"github.com/jkpair/yt-x-plus/internal/player"
-	"github.com/jkpair/yt-x-plus/internal/selfupdate"
-	"github.com/jkpair/yt-x-plus/internal/theme"
-	"github.com/jkpair/yt-x-plus/internal/youtube"
-	"github.com/jkpair/yt-x-plus/internal/ytdlp"
+	"github.com/jkpair/reelterm/internal/app"
+	"github.com/jkpair/reelterm/internal/player"
+	"github.com/jkpair/reelterm/internal/selfupdate"
+	"github.com/jkpair/reelterm/internal/theme"
+	"github.com/jkpair/reelterm/internal/youtube"
+	"github.com/jkpair/reelterm/internal/ytdlp"
 )
 
 var settingsDescs = map[string]string{
 	"Toggle Previews":            "Enable or disable video thumbnail previews in lists",
 	"Select Theme":               "Change the color theme for the interface",
 	"Select Browser":             "Browser to read YouTube cookies from (feeds, subscriptions, age-restricted videos)",
-	"Edit Config":                "Open the yt-x configuration file in your editor",
+	"Edit Config":                "Open the reelterm configuration file in your editor",
 	"Explore Channels":           "Search for and browse YouTube channels",
 	"Explore Playlists":          "Search for and browse YouTube playlists",
 	"Search History":             "Browse and re-run previous searches",
@@ -36,10 +36,10 @@ var settingsDescs = map[string]string{
 	"Edit Custom Commands":       "Open custom commands file in your editor",
 	"Sync YouTube Subscriptions": "Import your YouTube subscriptions from your browser",
 	"Check yt-dlp Version":       "Check if yt-dlp is up to date",
-	"Check for Updates":          "Check if a new version of yt-x is available",
+	"Check for Updates":          "Check if a new version of reelterm is available",
 	"Clear Search History":       "Delete all saved search history",
 	"Back":                       "Return to the main menu",
-	"Exit":                       "Quit yt-x",
+	"Exit":                       "Quit reelterm",
 }
 
 func onOff(b bool) string {

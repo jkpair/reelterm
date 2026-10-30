@@ -6,8 +6,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/jkpair/yt-x-plus/internal/youtube"
-	"github.com/jkpair/yt-x-plus/internal/ytdlp"
+	"github.com/jkpair/reelterm/internal/youtube"
+	"github.com/jkpair/reelterm/internal/ytdlp"
 )
 
 // NewChannelList shows channels; selecting one opens its action menu.

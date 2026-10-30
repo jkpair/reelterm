@@ -1,6 +1,6 @@
--- yt-x example plugin
+-- reelterm example plugin
 --
--- Copy to ~/.config/yt-x/plugins/ and load it with `yt-x -x example`, or
+-- Copy to ~/.config/reelterm/plugins/ and load it with `reelterm -x example`, or
 -- add it to AUTO_LOADED_EXTENSIONS in the config to load it on every start.
 --
 -- API (global `yt` table):
@@ -56,7 +56,7 @@ end)
 
 -- Log everything you play to a file.
 yt.on("play", function(video)
-  local f = io.open(os.getenv("HOME") .. "/.cache/yt-x/played.log", "a")
+  local f = io.open(os.getenv("HOME") .. "/.cache/reelterm/played.log", "a")
   if f then
     f:write(os.date("%Y-%m-%d %H:%M") .. "  " .. video.title .. "  " .. video.url .. "\n")
     f:close()

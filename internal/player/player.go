@@ -15,9 +15,9 @@ import (
 	"sync"
 	"unicode/utf16"
 
-	"github.com/jkpair/yt-x-plus/internal/app"
-	"github.com/jkpair/yt-x-plus/internal/config"
-	"github.com/jkpair/yt-x-plus/internal/ytdlp"
+	"github.com/jkpair/reelterm/internal/app"
+	"github.com/jkpair/reelterm/internal/config"
+	"github.com/jkpair/reelterm/internal/ytdlp"
 )
 
 // Request describes one playback.
@@ -134,7 +134,7 @@ func Capture(cmd *exec.Cmd, echo io.Writer) *bytes.Buffer {
 	return &buf
 }
 
-// Start runs cmd in the background. With disown it survives yt-x exiting;
+// Start runs cmd in the background. With disown it survives reelterm exiting;
 // otherwise it is killed by KillAll.
 func (p *Player) Start(cmd *exec.Cmd, disown bool) error {
 	cmd.Stdin = nil
@@ -252,8 +252,8 @@ func InteractiveShell(banner string) *exec.Cmd {
 	if sh == "" {
 		sh = "bash"
 	}
-	c := exec.Command("sh", "-c", `clear; printf '%s\n\n' "$YTX_BANNER"; exec "$YTX_SHELL"`)
-	c.Env = append(os.Environ(), "YTX_BANNER="+banner, "YTX_SHELL="+sh)
+	c := exec.Command("sh", "-c", `clear; printf '%s\n\n' "$REELTERM_BANNER"; exec "$REELTERM_SHELL"`)
+	c.Env = append(os.Environ(), "REELTERM_BANNER="+banner, "REELTERM_SHELL="+sh)
 	return c
 }
 

@@ -8,7 +8,7 @@
   chafa,
 }:
 buildGoModule {
-  pname = "yt-x";
+  pname = "reelterm";
   version = "1.0.1";
   src = lib.cleanSource ./.;
 
@@ -16,21 +16,21 @@ buildGoModule {
   # and paste the hash from the error message.
   vendorHash = lib.fakeHash;
 
-  subPackages = [ "cmd/yt-x" ];
-  ldflags = [ "-s" "-w" "-X github.com/jkpair/yt-x-plus/internal/app.Version=1.0.1" ];
+  subPackages = [ "cmd/reelterm" ];
+  ldflags = [ "-s" "-w" "-X github.com/jkpair/reelterm/internal/app.Version=1.0.1" ];
 
   nativeBuildInputs = [ makeWrapper ];
 
   postInstall = ''
-    wrapProgram $out/bin/yt-x \
+    wrapProgram $out/bin/reelterm \
       --prefix PATH : ${lib.makeBinPath [ yt-dlp mpv ffmpeg chafa ]}
-    install -Dm644 plugins/example.lua -t $out/share/yt-x/plugins
+    install -Dm644 plugins/example.lua -t $out/share/reelterm/plugins
   '';
 
   meta = {
     description = "Browse YouTube from your terminal";
-    homepage = "https://github.com/jkpair/yt-x-plus";
+    homepage = "https://github.com/jkpair/reelterm";
     license = lib.licenses.mit;
-    mainProgram = "yt-x";
+    mainProgram = "reelterm";
   };
 }

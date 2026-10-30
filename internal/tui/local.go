@@ -9,8 +9,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/jkpair/yt-x-plus/internal/player"
-	"github.com/jkpair/yt-x-plus/internal/ytdlp"
+	"github.com/jkpair/reelterm/internal/player"
+	"github.com/jkpair/reelterm/internal/ytdlp"
 )
 
 // Local library: browsing downloads and local mixes (replaces the

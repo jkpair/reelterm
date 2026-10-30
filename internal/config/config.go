@@ -1,4 +1,4 @@
-// Package config reads and writes yt-x.conf ("KEY: value" lines, # comments).
+// Package config reads and writes reelterm.conf ("KEY: value" lines, # comments).
 // The format is identical to the Bash version so existing configs keep working.
 package config
 
@@ -14,7 +14,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/jkpair/yt-x-plus/internal/app"
+	"github.com/jkpair/reelterm/internal/app"
 )
 
 type Config struct {

@@ -18,7 +18,7 @@ func TestNumeric(t *testing.T) {
 }
 
 func TestLoadAndSet(t *testing.T) {
-	p := filepath.Join(t.TempDir(), "yt-x.conf")
+	p := filepath.Join(t.TempDir(), "reelterm.conf")
 	cfg, first, err := Load(p)
 	if err != nil || !first {
 		t.Fatalf("first load: first=%v err=%v", first, err)

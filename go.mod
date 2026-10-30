@@ -1,4 +1,4 @@
-module github.com/jkpair/yt-x-plus
+module github.com/jkpair/reelterm
 
 go 1.26.0
 

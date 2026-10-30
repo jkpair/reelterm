@@ -1,7 +1,7 @@
 [Desktop Entry]
-Name=yt-x
+Name=reelterm
 Comment=Browse, stream and download YouTube from the terminal
-Exec=yt-x
+Exec=reelterm
 Terminal=true
 Type=Application
 Icon=multimedia-video-player

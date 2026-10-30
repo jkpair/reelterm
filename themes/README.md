@@ -1,10 +1,10 @@
-# yt-x Themes
+# reelterm Themes
 
-yt-x supports a comprehensive theming system that allows you to customize colors, icons, and UI elements.
+reelterm supports a comprehensive theming system that allows you to customize colors, icons, and UI elements.
 
 ## Quick Start
 
-1. **Set your theme** in `~/.config/yt-x/yt-x.conf`:
+1. **Set your theme** in `~/.config/reelterm/reelterm.conf`:
    ```
    THEME: everforest-dark-hard
    ```
@@ -16,14 +16,14 @@ yt-x supports a comprehensive theming system that allows you to customize colors
    - `gruvbox-dark`
    - `dracula`
 
-3. **Restart yt-x** to apply the theme.
+3. **Restart reelterm** to apply the theme.
 
 ## Theme Locations
 
 Themes are loaded from these locations (in order of priority):
 
-1. **User themes:** `~/.config/yt-x/themes/`
-2. **Built-in themes:** compiled into the yt-x binary (`yt-x --list-themes`)
+1. **User themes:** `~/.config/reelterm/themes/`
+2. **Built-in themes:** compiled into the reelterm binary (`reelterm --list-themes`)
 
 User themes with the same name will override built-in themes.
 
@@ -32,7 +32,7 @@ User themes with the same name will override built-in themes.
 ### 1. Copy a Template
 
 ```bash
-cp ~/.config/yt-x/themes/everforest-dark-hard.theme ~/.config/yt-x/themes/my-theme.theme
+cp ~/.config/reelterm/themes/everforest-dark-hard.theme ~/.config/reelterm/themes/my-theme.theme
 ```
 
 ### 2. Edit Your Theme
@@ -179,7 +179,7 @@ Use this formula to find the nearest 256-color code:
 
 ## Sharing Themes
 
-Found a cool combination? Consider submitting your theme to the yt-x repository!
+Found a cool combination? Consider submitting your theme to the reelterm repository!
 
 1. Fork the repo
 2. Add your `.theme` file to the `themes/` directory

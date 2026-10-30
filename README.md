@@ -1,19 +1,20 @@
-# yt-x-plus
+# reelterm
 
 Browse, stream and download YouTube from your terminal, plus other sites
 yt-dlp supports.
 
-A fork of [yt-x](https://github.com/Benexl/yt-x), rewritten in Go as a single
-static binary with a built-in interface.
+A single static binary with a built-in interface. reelterm started as a fork
+of [yt-x](https://github.com/Benexl/yt-x) and was rewritten in Go; it was
+called yt-x-plus until v1.1.
 
-[yt-x-plus-demo.webm](https://github.com/user-attachments/assets/027057fa-7c11-4361-a9b9-6a8d3bcd9776)
+[demo.webm](https://github.com/user-attachments/assets/027057fa-7c11-4361-a9b9-6a8d3bcd9776)
 
 ## Installation
 
 ### Any Linux distro or macOS (one line)
 
 ```bash
-curl -fsSL https://github.com/jkpair/yt-x-plus/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/jkpair/reelterm/releases/latest/download/install.sh | sh
 ```
 
 This installs a static binary to `/usr/local/bin` (it asks for sudo if
@@ -22,26 +23,26 @@ needed) and then checks your dependencies. Install for your user only with
 
 ### Packages
 
-Each [release](https://github.com/jkpair/yt-x-plus/releases/latest) has
+Each [release](https://github.com/jkpair/reelterm/releases/latest) has
 packages for the common package managers. They include shell completions, a
 desktop entry and the example plugin:
 
 ```bash
 # Debian / Ubuntu / Mint / Pop!_OS
-sudo apt install ./yt-x_*_linux_amd64.deb
+sudo apt install ./reelterm_*_linux_amd64.deb
 
 # Fedora / openSUSE / RHEL
-sudo dnf install ./yt-x_*_linux_amd64.rpm
+sudo dnf install ./reelterm_*_linux_amd64.rpm
 
 # Arch / Manjaro / EndeavourOS / CachyOS
-sudo pacman -U ./yt-x_*_linux_amd64.pkg.tar.zst
+sudo pacman -U ./reelterm_*_linux_amd64.pkg.tar.zst
 
 # Alpine
-sudo apk add --allow-untrusted ./yt-x_*_linux_amd64.apk
+sudo apk add --allow-untrusted ./reelterm_*_linux_amd64.apk
 ```
 
 Builds are available for `amd64`, `arm64` and `armv7` (e.g. Raspberry Pi).
-Plain binaries (`yt-x-linux-amd64`, …) and tarballs are attached too.
+Plain binaries (`reelterm-linux-amd64`, …) and tarballs are attached too.
 
 ### Windows (experimental)
 
@@ -49,14 +50,14 @@ Plain binaries (`yt-x-linux-amd64`, …) and tarballs are attached too.
 > The Windows build is **experimental**. It's built and its tests pass, but
 > it hasn't been tried on a real Windows machine yet. Bug reports are welcome.
 
-Download `yt-x-windows-amd64.exe` from the
-[latest release](https://github.com/jkpair/yt-x-plus/releases/latest), rename
-it to `yt-x.exe` and put it somewhere on your `PATH`. Use Windows Terminal with
+Download `reelterm-windows-amd64.exe` from the
+[latest release](https://github.com/jkpair/reelterm/releases/latest), rename
+it to `reelterm.exe` and put it somewhere on your `PATH`. Use Windows Terminal with
 a Nerd Font.
 
-`yt-x --install` installs yt-dlp and ffmpeg with winget. Install
+`reelterm --install` installs yt-dlp and ffmpeg with winget. Install
 [mpv](https://mpv.io/installation/) (or VLC) yourself. Config and cache live
-in `%APPDATA%\yt-x` and `%LOCALAPPDATA%\yt-x`.
+in `%APPDATA%\reelterm` and `%LOCALAPPDATA%\reelterm`.
 
 Thumbnails default to colour blocks on Windows. On Windows Terminal 1.22 or
 newer you can try real images with `IMAGE_RENDERER: sixel`, though they may
@@ -65,37 +66,42 @@ be sized incorrectly.
 ### Nix
 
 ```bash
-nix run github:jkpair/yt-x-plus
-nix profile install github:jkpair/yt-x-plus
+nix run github:jkpair/reelterm
+nix profile install github:jkpair/reelterm
 ```
 
 ### From source
 
 ```bash
-git clone https://github.com/jkpair/yt-x-plus.git
-cd yt-x-plus
-go build -o bin/yt-x ./cmd/yt-x
+git clone https://github.com/jkpair/reelterm.git
+cd reelterm
+go build -o bin/reelterm ./cmd/reelterm
 ```
 
-Requires Go 1.26+. Build into `bin/`: the `yt-x` file at the repository root
-is the migration script for old Bash installs (see below).
+Requires Go 1.26+. The `yt-x` file at the repository root is the migration
+script for old Bash installs (see below), not the program.
 
 ### Updating
 
 ```bash
-yt-x --update
+reelterm --update
 ```
 
 This replaces the binary with the latest release. Installs from distro
 packages or Nix should update through the package manager instead.
 
-#### Coming from the Bash version
+#### Coming from yt-x / yt-x-plus
 
-Run "Check for Updates" (or `yt-x -U`) once. The old updater downloads a small
-migration script, which swaps itself for the Go binary. Your config, themes,
-saved videos, recent list, subscriptions, custom playlists, custom commands
-and search history are read as they are. Two things are gone: rofi support,
-and sourced Bash extensions (replaced by [Lua plugins](#plugins)).
+`yt-x --update` (or "Check for Updates" in the Bash version) installs
+reelterm in place of the old binary, keeping the `yt-x` file name so the old
+command still works. On first start reelterm moves `~/.config/yt-x` and
+`~/.cache/yt-x` to `~/.config/reelterm` and `~/.cache/reelterm`, and renames
+`yt-x.conf` to `reelterm.conf`. Your config, themes, saved videos, recent
+list, subscriptions, custom playlists, custom commands and search history
+carry over; an existing `DOWNLOAD_DIRECTORY` (e.g. `~/Videos/yt-x`) is kept.
+
+From the Bash version, two things are gone: rofi support, and sourced Bash
+extensions (replaced by [Lua plugins](#plugins)).
 
 ## Dependencies
 
@@ -109,8 +115,8 @@ Required:
 Optional: `chafa` (alternative thumbnail renderer), `notify-send`
 (notifications), and `wl-copy`, `xclip` or `xsel` (Copy Link).
 
-`yt-x --check-deps` shows what is installed and which image protocol your
-terminal gets. `yt-x --install` installs anything missing with your package
+`reelterm --check-deps` shows what is installed and which image protocol your
+terminal gets. `reelterm --install` installs anything missing with your package
 manager (pacman, apt, dnf, zypper, xbps, apk, emerge, brew, Termux, or winget
 on Windows).
 
@@ -167,20 +173,20 @@ on Windows).
 ## Usage
 
 ```bash
-yt-x                          # launch
-yt-x -S ":week linux news"    # search directly
-yt-x -e                       # edit the config
-yt-x -p vlc                   # use vlc for this run
-yt-x --theme nord             # pick a theme for this run (--list-themes to see all)
-yt-x --no-preview             # hide the preview pane
-yt-x -x example               # load a Lua plugin
-yt-x completions --fish       # print shell completions (--bash, --zsh)
-yt-x --help
+reelterm                          # launch
+reelterm -S ":week linux news"    # search directly
+reelterm -e                       # edit the config
+reelterm -p vlc                   # use vlc for this run
+reelterm --theme nord             # pick a theme for this run (--list-themes to see all)
+reelterm --no-preview             # hide the preview pane
+reelterm -x example               # load a Lua plugin
+reelterm completions --fish       # print shell completions (--bash, --zsh)
+reelterm --help
 ```
 
 ## Configuration
 
-The config lives at `~/.config/yt-x/yt-x.conf` (`yt-x -e` or Settings → Edit
+The config lives at `~/.config/reelterm/reelterm.conf` (`reelterm -e` or Settings → Edit
 Config). Every option is documented in the file. Highlights:
 
 ```ini
@@ -190,18 +196,18 @@ IMAGE_RENDERER: auto        # auto, kitty, sixel, iterm, halfblock or chafa
 PLAYER: mpv
 PREFERRED_BROWSER: firefox  # browser to read YouTube cookies from
 COOKIE_FILE:                # cookies.txt fallback
-DOWNLOAD_DIRECTORY: ~/Videos/yt-x
+DOWNLOAD_DIRECTORY: ~/Videos/reelterm
 SPONSORBLOCK: false
 RESUME_PLAYBACK: true
 ```
 
 Themes: see [themes/README.md](themes/README.md). Put your own `*.theme` files
-in `~/.config/yt-x/themes/`.
+in `~/.config/reelterm/themes/`.
 
 ### Enabling subscriptions and private playlists
 
 Set your browser in the config, or pick it from Settings → Select Browser
-(yt-x tests that cookie extraction works):
+(reelterm tests that cookie extraction works):
 
 ```ini
 PREFERRED_BROWSER: firefox
@@ -221,7 +227,7 @@ yt-dlp --cookies-from-browser "brave+gnomekeyring:Default" --skip-download --fla
 
 ### mpv and yt-dlp tips
 
-yt-x passes your cookies and its yt-dlp options (SponsorBlock etc.) to mpv
+reelterm passes your cookies and its yt-dlp options (SponsorBlock etc.) to mpv
 automatically. You can still tune mpv in `mpv.conf` (Settings → Edit MPV
 Config):
 
@@ -240,7 +246,7 @@ For a nicer player, try [uosc](https://github.com/tomasklaen/uosc) and
 ### Custom playlists
 
 Save any playlist from its action menu (Save Playlist), or edit
-`~/.config/yt-x/custom_playlists.json`:
+`~/.config/reelterm/custom_playlists.json`:
 
 ```json
 [
@@ -254,8 +260,8 @@ Save any playlist from its action menu (Save Playlist), or edit
 
 ## Plugins
 
-Plugins are Lua files in `~/.config/yt-x/plugins/`. Load one for a run with
-`yt-x -x <name>`, or on every start with `AUTO_LOADED_EXTENSIONS: name1,name2`
+Plugins are Lua files in `~/.config/reelterm/plugins/`. Load one for a run with
+`reelterm -x <name>`, or on every start with `AUTO_LOADED_EXTENSIONS: name1,name2`
 in the config. A plugin can add main-menu entries and video actions, hook
 `play` / `download` / `search`, run searches and open the results in the
 normal list (with previews), and play, download or open URLs.
@@ -292,7 +298,7 @@ Start a search with one `:filter`: `:filter your query`.
 ```bash
 nix develop               # or install Go 1.26+
 go test -race ./...
-go build -o bin/yt-x ./cmd/yt-x
+go build -o bin/reelterm ./cmd/reelterm
 ```
 
 Releases are built by GitHub Actions with [GoReleaser](https://goreleaser.com)
@@ -300,15 +306,12 @@ when a `v*` tag is pushed (`.goreleaser.yaml`).
 
 ## Credits
 
-Based on [yt-x](https://github.com/Benexl/yt-x) by
-[Benexl](https://github.com/Benexl).
+reelterm began as a fork of [yt-x](https://github.com/Benexl/yt-x) by
+[Benexl](https://github.com/Benexl), whose design, config format and themes
+it builds on. If you enjoy it, consider
+[supporting Benexl](https://buymeacoffee.com/benexl).
 
 ## Support
 
-Need help with the upstream project? Join the community on Discord:
-
-<p align="center">
-<a href="https://discord.gg/HBEmAwvbHV">
-<img src="https://invidget.switchblade.xyz/C4rhMA4mmK">
-</a>
-</p>
+Found a bug or have an idea? Open an
+[issue](https://github.com/jkpair/reelterm/issues).

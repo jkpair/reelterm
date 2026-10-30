@@ -1,7 +1,7 @@
 package config
 
 const confTemplate = `#
-#    yt-x config
+#    reelterm config
 #
 
 # plugins loaded on every start (comma-separated file names in the plugins folder, .lua optional)
@@ -10,8 +10,8 @@ AUTO_LOADED_EXTENSIONS: {{join .AutoLoadedPlugins}}
 # whether to show colors when printing ouput
 PRETTY_PRINT: {{.PrettyPrint}}
 
-# color theme (run yt-x --list-themes)
-# themes are loaded from ~/.config/yt-x/themes/ or the built-in themes
+# color theme (run reelterm --list-themes)
+# themes are loaded from ~/.config/reelterm/themes/ or the built-in themes
 THEME: {{.Theme}}
 
 # your preferred editor for editing your config
@@ -31,7 +31,7 @@ IMAGE_RENDERER: {{.ImageRenderer}}
 # resume videos where you stopped watching (mpv) [true/false]
 RESUME_PLAYBACK: {{.ResumePlayback}}
 
-# whether to keep the player running after yt-x exits
+# whether to keep the player running after reelterm exits
 DISOWN_STREAMING_PROCESS: {{.DisownStreaming}}
 
 # whether to update the recent list kept locally [true/false]

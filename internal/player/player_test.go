@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jkpair/yt-x-plus/internal/config"
-	"github.com/jkpair/yt-x-plus/internal/ytdlp"
+	"github.com/jkpair/reelterm/internal/config"
+	"github.com/jkpair/reelterm/internal/ytdlp"
 )
 
 func TestMpvYtdlRaw(t *testing.T) {

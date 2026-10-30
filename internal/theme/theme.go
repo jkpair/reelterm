@@ -13,7 +13,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/jkpair/yt-x-plus/themes"
+	"github.com/jkpair/reelterm/themes"
 )
 
 const Default = "everforest-dark-hard"

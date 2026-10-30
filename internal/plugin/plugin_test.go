@@ -5,12 +5,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/jkpair/yt-x-plus/internal/config"
-	"github.com/jkpair/yt-x-plus/internal/ytdlp"
+	"github.com/jkpair/reelterm/internal/config"
+	"github.com/jkpair/reelterm/internal/ytdlp"
 )
 
 func newRuntime(t *testing.T) *Runtime {
-	cfg, _, err := config.Load(filepath.Join(t.TempDir(), "yt-x.conf"))
+	cfg, _, err := config.Load(filepath.Join(t.TempDir(), "reelterm.conf"))
 	if err != nil {
 		t.Fatal(err)
 	}

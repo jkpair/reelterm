@@ -6,8 +6,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/jkpair/yt-x-plus/internal/youtube"
-	"github.com/jkpair/yt-x-plus/internal/ytdlp"
+	"github.com/jkpair/reelterm/internal/youtube"
+	"github.com/jkpair/reelterm/internal/ytdlp"
 )
 
 var mainDescs = map[string]string{
@@ -24,8 +24,8 @@ var mainDescs = map[string]string{
 	"Custom Playlists":  "User-created custom playlists",
 	"Clips":             "Browse your YouTube clips",
 	"Downloads":         "Download queue and channel/playlist/search downloaders",
-	"Settings":          "Configure yt-x preferences, themes, and more",
-	"Exit":              "Quit yt-x",
+	"Settings":          "Configure reelterm preferences, themes, and more",
+	"Exit":              "Quit reelterm",
 }
 
 // NewMainMenu builds the root menu.

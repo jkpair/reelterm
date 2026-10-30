@@ -1,10 +1,10 @@
-# yt-x Theme: One Dark
+# reelterm Theme: One Dark
 # Atom editor's iconic dark color scheme
 # https://github.com/atom/one-dark-syntax
 
 # Theme metadata
 THEME_NAME="One Dark"
-THEME_AUTHOR="Atom/GitHub, yt-x adaptation"
+THEME_AUTHOR="Atom/GitHub, reelterm adaptation"
 THEME_VERSION="1.0"
 
 # =============================================================================

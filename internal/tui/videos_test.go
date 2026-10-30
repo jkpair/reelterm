@@ -9,12 +9,12 @@ import (
 
 	"github.com/charmbracelet/x/ansi"
 
-	"github.com/jkpair/yt-x-plus/internal/app"
-	"github.com/jkpair/yt-x-plus/internal/cache"
-	"github.com/jkpair/yt-x-plus/internal/config"
-	"github.com/jkpair/yt-x-plus/internal/theme"
-	"github.com/jkpair/yt-x-plus/internal/thumb"
-	"github.com/jkpair/yt-x-plus/internal/ytdlp"
+	"github.com/jkpair/reelterm/internal/app"
+	"github.com/jkpair/reelterm/internal/cache"
+	"github.com/jkpair/reelterm/internal/config"
+	"github.com/jkpair/reelterm/internal/theme"
+	"github.com/jkpair/reelterm/internal/thumb"
+	"github.com/jkpair/reelterm/internal/ytdlp"
 )
 
 var cuf = regexp.MustCompile(`\x1b\[(\d+)C`)

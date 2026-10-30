@@ -11,7 +11,7 @@ import (
 func TestWindowsPathsUseAppData(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", "")
 	t.Setenv("XDG_CACHE_HOME", "")
-	t.Setenv("USERPROFILE", t.TempDir()) // no existing ~/.config/yt-x
+	t.Setenv("USERPROFILE", t.TempDir()) // no existing ~/.config/reelterm
 	p := NewPaths()
 	cfg, _ := os.UserConfigDir()
 	cache, _ := os.UserCacheDir()
@@ -24,8 +24,8 @@ func TestWindowsKeepsExistingDotConfig(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", "")
 	t.Setenv("USERPROFILE", home)
-	os.MkdirAll(home+`\.config\yt-x`, 0o755)
-	if p := NewPaths(); p.ConfigDir != home+`\.config\yt-x` {
+	os.MkdirAll(home+`\.config\reelterm`, 0o755)
+	if p := NewPaths(); p.ConfigDir != home+`\.config\reelterm` {
 		t.Fatalf("config=%s", p.ConfigDir)
 	}
 }

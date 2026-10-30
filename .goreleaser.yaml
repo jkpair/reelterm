@@ -1,22 +1,22 @@
 version: 2
-project_name: yt-x
+project_name: reelterm
 
 before:
   hooks:
     - go mod tidy
     - go test ./...
-    - sh -c "mkdir -p completions && go run ./cmd/yt-x completions --bash > completions/yt-x.bash && go run ./cmd/yt-x completions --fish > completions/yt-x.fish && go run ./cmd/yt-x completions --zsh > completions/_yt-x"
+    - sh -c "mkdir -p completions && go run ./cmd/reelterm completions --bash > completions/reelterm.bash && go run ./cmd/reelterm completions --fish > completions/reelterm.fish && go run ./cmd/reelterm completions --zsh > completions/_reelterm"
 
 builds:
-  - id: yt-x
-    main: ./cmd/yt-x
-    binary: yt-x
+  - id: reelterm
+    main: ./cmd/reelterm
+    binary: reelterm
     env:
       - CGO_ENABLED=0 # fully static: runs on any distro, glibc or musl
     flags:
       - -trimpath
     ldflags:
-      - -s -w -X github.com/jkpair/yt-x-plus/internal/app.Version={{ .Version }}
+      - -s -w -X github.com/jkpair/reelterm/internal/app.Version={{ .Version }}
     goos: [linux, darwin, windows]
     goarch: [amd64, arm64, arm]
     goarm: ["7"]
@@ -26,11 +26,16 @@ builds:
       - { goos: windows, goarch: arm64 }
 
 archives:
-  # Raw binaries named yt-x-<os>-<arch>: what `yt-x --update`, install.sh
-  # and the old Bash script's updater download.
+  # Raw binaries named reelterm-<os>-<arch>: what `reelterm --update`,
+  # install.sh and the migration script download.
   - id: binary
     formats: [binary]
     name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+  # The same binaries under the pre-rename name, which `--update` in
+  # yt-x 1.0.x looks for.
+  - id: legacy-binary
+    formats: [binary]
+    name_template: "yt-x-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
   # Tarballs with docs, completions and the example plugin.
   - id: tarball
     formats: [tar.gz]
@@ -45,17 +50,17 @@ archives:
 
 nfpms:
   - id: packages
-    package_name: yt-x
+    package_name: reelterm
     file_name_template: "{{ .PackageName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
     vendor: jkpair
-    homepage: https://github.com/jkpair/yt-x-plus
+    homepage: https://github.com/jkpair/reelterm
     maintainer: jkpair <jkpair@users.noreply.github.com>
     description: Browse, stream and download YouTube from your terminal.
     license: MIT
     formats: [deb, rpm, apk, archlinux]
     bindir: /usr/bin
     # Recommended rather than required: package names differ between
-    # distros (ffmpeg needs RPM Fusion on Fedora) and `yt-x --install`
+    # distros (ffmpeg needs RPM Fusion on Fedora) and `reelterm --install`
     # sets them up with the system package manager.
     recommends: [yt-dlp, mpv, ffmpeg]
     suggests: [chafa, libnotify, wl-clipboard]
@@ -63,18 +68,18 @@ nfpms:
       archlinux:
         suggests: [yt-dlp, mpv, ffmpeg, chafa, libnotify, wl-clipboard]
     contents:
-      - src: completions/yt-x.bash
-        dst: /usr/share/bash-completion/completions/yt-x
-      - src: completions/yt-x.fish
-        dst: /usr/share/fish/vendor_completions.d/yt-x.fish
-      - src: completions/_yt-x
-        dst: /usr/share/zsh/site-functions/_yt-x
+      - src: completions/reelterm.bash
+        dst: /usr/share/bash-completion/completions/reelterm
+      - src: completions/reelterm.fish
+        dst: /usr/share/fish/vendor_completions.d/reelterm.fish
+      - src: completions/_reelterm
+        dst: /usr/share/zsh/site-functions/_reelterm
       - src: plugins/example.lua
-        dst: /usr/share/yt-x/plugins/example.lua
-      - src: packaging/yt-x.desktop
-        dst: /usr/share/applications/yt-x.desktop
+        dst: /usr/share/reelterm/plugins/example.lua
+      - src: packaging/reelterm.desktop
+        dst: /usr/share/applications/reelterm.desktop
       - src: LICENSE
-        dst: /usr/share/licenses/yt-x/LICENSE
+        dst: /usr/share/licenses/reelterm/LICENSE
 
 checksum:
   name_template: checksums.txt
@@ -82,7 +87,7 @@ checksum:
 release:
   github:
     owner: jkpair
-    name: yt-x-plus
+    name: reelterm
   extra_files:
     - glob: ./install.sh
 

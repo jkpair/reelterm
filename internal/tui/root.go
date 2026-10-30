@@ -7,10 +7,10 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/jkpair/yt-x-plus/internal/config"
-	"github.com/jkpair/yt-x-plus/internal/download"
-	"github.com/jkpair/yt-x-plus/internal/theme"
-	"github.com/jkpair/yt-x-plus/internal/thumb"
+	"github.com/jkpair/reelterm/internal/config"
+	"github.com/jkpair/reelterm/internal/download"
+	"github.com/jkpair/reelterm/internal/theme"
+	"github.com/jkpair/reelterm/internal/thumb"
 )
 
 // Screen is one entry in the navigation stack.

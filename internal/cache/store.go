@@ -15,11 +15,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jkpair/yt-x-plus/internal/app"
-	"github.com/jkpair/yt-x-plus/internal/ytdlp"
+	"github.com/jkpair/reelterm/internal/app"
+	"github.com/jkpair/reelterm/internal/ytdlp"
 )
 
-// Store gives typed access to everything yt-x keeps on disk.
+// Store gives typed access to everything reelterm keeps on disk.
 type Store struct {
 	P  app.Paths
 	mu sync.Mutex

@@ -1,4 +1,4 @@
-// Command yt-x browses YouTube from the terminal.
+// Command reelterm browses YouTube from the terminal.
 package main
 
 import (
@@ -13,18 +13,18 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/jkpair/yt-x-plus/internal/app"
-	"github.com/jkpair/yt-x-plus/internal/cache"
-	"github.com/jkpair/yt-x-plus/internal/config"
-	"github.com/jkpair/yt-x-plus/internal/deps"
-	"github.com/jkpair/yt-x-plus/internal/download"
-	"github.com/jkpair/yt-x-plus/internal/player"
-	"github.com/jkpair/yt-x-plus/internal/plugin"
-	"github.com/jkpair/yt-x-plus/internal/selfupdate"
-	"github.com/jkpair/yt-x-plus/internal/theme"
-	"github.com/jkpair/yt-x-plus/internal/thumb"
-	"github.com/jkpair/yt-x-plus/internal/tui"
-	"github.com/jkpair/yt-x-plus/internal/ytdlp"
+	"github.com/jkpair/reelterm/internal/app"
+	"github.com/jkpair/reelterm/internal/cache"
+	"github.com/jkpair/reelterm/internal/config"
+	"github.com/jkpair/reelterm/internal/deps"
+	"github.com/jkpair/reelterm/internal/download"
+	"github.com/jkpair/reelterm/internal/player"
+	"github.com/jkpair/reelterm/internal/plugin"
+	"github.com/jkpair/reelterm/internal/selfupdate"
+	"github.com/jkpair/reelterm/internal/theme"
+	"github.com/jkpair/reelterm/internal/thumb"
+	"github.com/jkpair/reelterm/internal/tui"
+	"github.com/jkpair/reelterm/internal/ytdlp"
 )
 
 const header = `╭──────────────────────────────────────╮
@@ -163,11 +163,11 @@ func byebye(env *tui.Env) {
 		name = u.Username
 	}
 	s := env.S
-	l1, l2 := "Thanks for using yt-x", "Have a good day, "+name
+	l1, l2 := "Thanks for using reelterm", "Have a good day, "+name
 	w := max(len([]rune(l1)), len([]rune(l2)))
 	border := strings.Repeat("─", w+4)
 	fmt.Println(s.Title.Render("┌" + border + "┐"))
-	fmt.Println(s.Title.Render("│") + "  " + s.Dim.Render("Thanks for using ") + s.Fg.Bold(true).Render("yt-x") + strings.Repeat(" ", w-len([]rune(l1))) + "  " + s.Title.Render("│"))
+	fmt.Println(s.Title.Render("│") + "  " + s.Dim.Render("Thanks for using ") + s.Fg.Bold(true).Render("reelterm") + strings.Repeat(" ", w-len([]rune(l1))) + "  " + s.Title.Render("│"))
 	fmt.Println(s.Title.Render("│") + "  " + s.Dim.Render("Have a good day, ") + name + strings.Repeat(" ", w-len([]rune(l2))) + "  " + s.Title.Render("│"))
 	fmt.Println(s.Title.Render("└" + border + "┘"))
 }
@@ -186,7 +186,7 @@ func parseArgs(args []string, cfg *config.Config, paths app.Paths) (opts options
 			usage(paths)
 			return opts, true, nil
 		case "-v", "--version":
-			fmt.Printf("%s v%s Copyright © 2024 %s projects\n", paths.Name, app.Version, app.Author)
+			fmt.Printf("%s v%s Copyright © 2026 %s\n", paths.Name, app.Version, app.Author)
 			return opts, true, nil
 		case "-e", "--edit-config":
 			opts.editConfig = true
@@ -198,7 +198,7 @@ func parseArgs(args []string, cfg *config.Config, paths app.Paths) (opts options
 			case err != nil:
 				return opts, true, err
 			case tag == "":
-				fmt.Println("yt-x is up to date :)")
+				fmt.Println("reelterm is up to date :)")
 			default:
 				fmt.Println("Updated to", tag)
 			}
@@ -265,14 +265,14 @@ func parseArgs(args []string, cfg *config.Config, paths app.Paths) (opts options
 		case "--no-disown-streaming-process":
 			cfg.DisownStreaming = false
 		case "--disown-downloading-process", "--no-disown-downloading-process":
-			// Downloads now run inside yt-x with a progress queue.
+			// Downloads now run inside reelterm with a progress queue.
 		case "-s", "--preferred-selector", "--rofi-theme":
 			v, err := need(i, a)
 			if err != nil {
 				return opts, true, err
 			}
 			if v != "fzf" {
-				fmt.Fprintln(os.Stderr, "note: rofi support was removed; yt-x now has a built-in interface")
+				fmt.Fprintln(os.Stderr, "note: rofi support was removed; reelterm now has a built-in interface")
 			}
 			i++
 		case "-E", "--generate-desktop-entry":

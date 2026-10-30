@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jkpair/yt-x-plus/internal/config"
+	"github.com/jkpair/reelterm/internal/config"
 )
 
 // ErrBotCheck is returned when YouTube asks to "confirm you're not a bot".
@@ -31,7 +31,7 @@ func New(cfg *config.Config) *Client {
 		Bin:        "yt-dlp",
 		Browser:    cfg.PreferredBrowser,
 		CookieFile: cfg.CookieFile,
-		Debug:      os.Getenv("YT_X_DEBUG") != "",
+		Debug:      os.Getenv("REELTERM_DEBUG") != "",
 	}
 }
 

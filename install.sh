@@ -1,7 +1,7 @@
 #!/bin/sh
-# yt-x installer: downloads the latest static binary from GitHub releases.
+# reelterm installer: downloads the latest static binary from GitHub releases.
 #
-#   curl -fsSL https://github.com/jkpair/yt-x-plus/releases/latest/download/install.sh | sh
+#   curl -fsSL https://github.com/jkpair/reelterm/releases/latest/download/install.sh | sh
 #
 # Options (pass after `sh -s --` when piping):
 #   --user        install to ~/.local/bin instead of /usr/local/bin
@@ -9,7 +9,7 @@
 #   --version <v> install a specific release tag (e.g. v1.0.0)
 set -eu
 
-repo="jkpair/yt-x-plus"
+repo="jkpair/reelterm"
 dir="/usr/local/bin"
 version="latest"
 
@@ -36,7 +36,7 @@ armv7* | armv8l) arch=armv7 ;;
 *) echo "unsupported architecture: $(uname -m)" >&2; exit 1 ;;
 esac
 
-asset="yt-x-$os-$arch"
+asset="reelterm-$os-$arch"
 if [ "$version" = latest ]; then
   url="https://github.com/$repo/releases/latest/download/$asset"
 else
@@ -68,8 +68,8 @@ if [ ! -w "$dir" ]; then
     exit 1
   fi
 fi
-$sudo install -m 755 "$tmp" "$dir/yt-x"
-echo "Installed $("$dir/yt-x" --version) to $dir/yt-x"
+$sudo install -m 755 "$tmp" "$dir/reelterm"
+echo "Installed $("$dir/reelterm" --version) to $dir/reelterm"
 
 case ":$PATH:" in
 *":$dir:"*) ;;
@@ -77,4 +77,4 @@ case ":$PATH:" in
 esac
 
 echo
-"$dir/yt-x" --check-deps || echo "Run 'yt-x --install' to install the missing dependencies."
+"$dir/reelterm" --check-deps || echo "Run 'reelterm --install' to install the missing dependencies."

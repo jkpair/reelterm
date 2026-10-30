@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
-# yt-x is now a Go binary: https://github.com/jkpair/yt-x-plus
+# yt-x is now reelterm, a Go binary: https://github.com/jkpair/reelterm
 #
 # This file replaces the old Bash script so existing installs migrate on
 # their next update ("Check for Updates" or `yt-x -U`): the old updater
 # downloads this file and runs it, and it swaps itself for the binary of the
-# latest release. To install fresh, use install.sh from the releases page.
+# latest release (keeping the yt-x file name, so the command still works).
+# To install fresh, use install.sh from the releases page.
 CLI_VERSION="1.0.1"
 
 set -eu
-repo="jkpair/yt-x-plus"
+repo="jkpair/reelterm"
 
 case "$(uname -s)" in
 Linux) os=linux ;;
@@ -26,8 +27,10 @@ self="$(realpath "$0")"
 tmp="$(mktemp "$(dirname "$self")/.yt-x-XXXXXX" 2>/dev/null || mktemp)"
 trap 'rm -f "$tmp"' EXIT
 
-echo "yt-x has moved to Go. Downloading the yt-x-$os-$arch binary..."
-curl -fL --progress-bar "https://github.com/$repo/releases/latest/download/yt-x-$os-$arch" -o "$tmp"
+echo "yt-x is now reelterm, rewritten in Go. Downloading the reelterm-$os-$arch binary..."
+# Releases before the rename only have yt-x-<os>-<arch>.
+curl -fL --progress-bar "https://github.com/$repo/releases/latest/download/reelterm-$os-$arch" -o "$tmp" ||
+  curl -fL --progress-bar "https://github.com/$repo/releases/latest/download/yt-x-$os-$arch" -o "$tmp"
 chmod 755 "$tmp"
 "$tmp" --version >/dev/null
 
@@ -38,7 +41,8 @@ else
 fi
 trap - EXIT
 echo "Installed $("$self" --version) at $self"
-echo "Your config, themes and saved data carry over. Bash extensions are replaced by Lua plugins:"
+echo "Your config, themes and saved data move to reelterm's folders on first start."
+echo "Bash extensions are replaced by Lua plugins:"
 echo "  https://github.com/$repo/blob/master/plugins/example.lua"
 echo
 exec "$self" "$@"

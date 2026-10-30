@@ -53,7 +53,7 @@ func (m *Manager) Wait() tea.Cmd {
 	return func() tea.Msg { return <-m.ch }
 }
 
-const marker = "YTX|"
+const marker = "REELTERM|"
 
 // Start launches yt-dlp with args (URL and options) in the background.
 func (m *Manager) Start(title string, args []string) int {
