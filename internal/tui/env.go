@@ -52,7 +52,8 @@ type Env struct {
 	Thumbs    *thumb.Manager
 	Downloads *download.Manager
 	Hooks     Hooks
-	Header    string
+	// Headers are logo banners, largest first.
+	Headers []string
 	// BodyTop is the screen row where the current screen's body starts.
 	BodyTop int
 }

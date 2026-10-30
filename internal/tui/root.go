@@ -6,6 +6,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 
 	"github.com/jkpair/reelterm/internal/config"
 	"github.com/jkpair/reelterm/internal/download"
@@ -206,11 +207,15 @@ func (r *Root) forceExit() tea.Cmd {
 }
 
 func (r *Root) headerView() string {
-	if r.h < 34 || r.w < 62 || r.env.Header == "" {
-		title := r.env.S.Title.Render(" " + r.env.Paths.Name)
-		return title + r.env.S.Dim.Render("  Kurl_Marx Edition") + "\n"
+	// Use the largest banner that leaves the last column free and at least
+	// 24 rows for the body; fall back to a one-line title.
+	for _, h := range r.env.Headers {
+		if lipgloss.Width(h) < r.w && strings.Count(h, "\n")+1+24 <= r.h {
+			return r.env.S.Header.Render(h) + "\n"
+		}
 	}
-	return r.env.S.Header.Render(r.env.Header) + "\n"
+	title := r.env.S.Title.Render(" " + r.env.Paths.Name)
+	return title + r.env.S.Dim.Render("  Kurl_Marx Edition") + "\n"
 }
 
 func (r *Root) statusView() string {

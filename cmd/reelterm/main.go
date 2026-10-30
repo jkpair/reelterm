@@ -27,6 +27,21 @@ import (
 	"github.com/jkpair/reelterm/internal/ytdlp"
 )
 
+// Headers from largest to smallest; the TUI shows the first that fits.
+const headerLarge = `╭───────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                   │
+│                               ████   █████                                        │
+│                              ▒▒███  ▒▒███                                         │
+│   ████████   ██████   ██████  ▒███  ███████    ██████  ████████  █████████████    │
+│  ▒▒███▒▒███ ███▒▒███ ███▒▒███ ▒███ ▒▒▒███▒    ███▒▒███▒▒███▒▒███▒▒███▒▒███▒▒███   │
+│   ▒███ ▒▒▒ ▒███████ ▒███████  ▒███   ▒███    ▒███████  ▒███ ▒▒▒  ▒███ ▒███ ▒███   │
+│   ▒███     ▒███▒▒▒  ▒███▒▒▒   ▒███   ▒███ ███▒███▒▒▒   ▒███      ▒███ ▒███ ▒███   │
+│   █████    ▒▒██████ ▒▒██████  █████  ▒▒█████ ▒▒██████  █████     █████▒███ █████  │
+│  ▒▒▒▒▒      ▒▒▒▒▒▒   ▒▒▒▒▒▒  ▒▒▒▒▒    ▒▒▒▒▒   ▒▒▒▒▒▒  ▒▒▒▒▒     ▒▒▒▒▒ ▒▒▒ ▒▒▒▒▒   │
+│                                                                                   │
+│                                                   Kurl_Marx Edition  v%-12s│
+╰───────────────────────────────────────────────────────────────────────────────────╯`
+
 const header = `╭──────────────────────────────────────────────────────────╮
 │                                                          │
 │                        ██  ▄▄                            │
@@ -99,7 +114,7 @@ func run() error {
 		Player:    pl,
 		Thumbs:    thumbs,
 		Downloads: dl,
-		Header:    fmt.Sprintf(header, app.Version),
+		Headers:   []string{fmt.Sprintf(headerLarge, app.Version), fmt.Sprintf(header, app.Version)},
 	}
 	env.SetTheme(theme.MustLoad(cfg.Theme, paths.ThemesDir))
 
