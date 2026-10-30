@@ -9,7 +9,7 @@
 }:
 buildGoModule {
   pname = "reelterm";
-  version = "1.1.0";
+  version = "1.1.1";
   src = lib.cleanSource ./.;
 
   # After changing go.mod/go.sum, set this to lib.fakeHash, run `nix build`,
@@ -17,7 +17,7 @@ buildGoModule {
   vendorHash = lib.fakeHash;
 
   subPackages = [ "cmd/reelterm" ];
-  ldflags = [ "-s" "-w" "-X github.com/jkpair/reelterm/internal/app.Version=1.1.0" ];
+  ldflags = [ "-s" "-w" "-X github.com/jkpair/reelterm/internal/app.Version=1.1.1" ];
 
   nativeBuildInputs = [ makeWrapper ];
 

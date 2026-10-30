@@ -9,7 +9,7 @@ import (
 )
 
 // Version is set at build time with -ldflags "-X .../internal/app.Version=x.y.z".
-var Version = "1.1.0"
+var Version = "1.1.1"
 
 const (
 	Author            = "jkpair"

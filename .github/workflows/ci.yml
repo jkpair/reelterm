@@ -15,3 +15,6 @@ jobs:
           go-version-file: go.mod
       - run: go vet ./...
       - run: go test -race ./...
+      # The root yt-x file must stay the Bash migration script that old
+      # installs download; running it locally replaces it with a binary.
+      - run: head -n1 yt-x | grep -qx '#!/usr/bin/env bash' && grep -q '^CLI_VERSION=' yt-x
