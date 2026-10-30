@@ -677,66 +677,12 @@ kill_bg_feed_fetch() {
 merge_feed_entries() {
   local existing="$1"
   local new_entries="$2"
-  # Preserve existing order, append only truly new entries at the end
+  # Preserve existing order, prepend only truly new entries so fresh content is on page 1
   echo "$existing" | jq --argjson new "$(echo "$new_entries" | jq '.entries')" '
     .entries as $old |
     ($old | map(.id // .url)) as $seen |
-    .entries = ($old + [$new[] | select((.id // .url) as $k | $seen | index($k) | not)])
+    .entries = ([$new[] | select((.id // .url) as $k | $seen | index($k) | not)] + $old)
   '
-}
-
-start_bg_feed_extend() {
-  local url="$1"
-  local fetch_count="${2:-$((NO_OF_SEARCH_RESULTS * 2))}"
-  is_bg_feed_extend_running && return
-  [ -n "$YT_X_DEBUG" ] && echo "[DEBUG] Starting background feed extend fetch (count=$fetch_count)" >&2
-  (
-    local result
-    result=$(yt-dlp "$url" -J --flat-playlist --extractor-args youtubetab:approximate_date --playlist-end "$fetch_count" "${PREFERRED_BROWSER_OPTS[@]}" 2>/dev/null)
-    if echo "$result" | jq -e '.entries' >/dev/null 2>&1; then
-      write_file_locked "$result" "$CLI_CACHE_DIR/feed_bg_extend_result.json"
-    fi
-  ) &
-  echo "$!" > "$CLI_CACHE_DIR/feed_bg_extend.pid"
-  disown
-}
-
-check_bg_feed_extend_result() {
-  local pid_file="$CLI_CACHE_DIR/feed_bg_extend.pid"
-  local result_file="$CLI_CACHE_DIR/feed_bg_extend_result.json"
-  if [ -f "$pid_file" ]; then
-    local pid
-    pid=$(cat "$pid_file" 2>/dev/null)
-    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
-      return 1  # still running
-    fi
-  fi
-  [ -f "$result_file" ] || return 1
-  local json
-  json=$(read_file_locked "$result_file") || return 1
-  validate_json_response "$json" "bg feed extend result" 2>/dev/null || return 1
-  echo "$json"
-}
-
-is_bg_feed_extend_running() {
-  local pid_file="$CLI_CACHE_DIR/feed_bg_extend.pid"
-  [ -f "$pid_file" ] || return 1
-  local pid
-  pid=$(cat "$pid_file" 2>/dev/null)
-  [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null
-}
-
-kill_bg_feed_extend() {
-  local pid_file="$CLI_CACHE_DIR/feed_bg_extend.pid"
-  if [ -f "$pid_file" ]; then
-    local pid
-    pid=$(cat "$pid_file" 2>/dev/null)
-    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
-      kill "$pid" 2>/dev/null
-      wait "$pid" 2>/dev/null
-    fi
-    rm -f "$pid_file"
-  fi
 }
 
 # --- Live feed auto-update functions ---
@@ -798,7 +744,7 @@ build_homepage_fzf_input() {
   } > "$output_file"
 }
 
-# Start background process that checks for feed extend results and reloads fzf
+# Start background process that periodically re-fetches the feed and reloads fzf
 start_feed_live_updater() {
   local data_file="$1"
   local titles_file="$2"
@@ -806,52 +752,79 @@ start_feed_live_updater() {
   local url="$4"
   local page_file="$5"
   (
-    local feed_no_more=0
-    while [ -f "$CLI_CACHE_DIR/feed_live_updater.pid" ]; do
+    local empty_streak=0
+    local max_empty_streak=8
+    local fetch_interval=60
+    # Initial delay before first refresh — let the user browse first
+    local wait_remaining=60
+    while [ "$wait_remaining" -gt 0 ] && [ -f "$CLI_CACHE_DIR/feed_live_updater.pid" ]; do
       sleep 3
+      wait_remaining=$((wait_remaining - 3))
+    done
+    while [ -f "$CLI_CACHE_DIR/feed_live_updater.pid" ]; do
+      [ -n "$YT_X_DEBUG" ] && echo "[DEBUG] Live updater: fetching fresh feed" >&2
+      local fresh_result
+      fresh_result=$(yt-dlp "$url" -J --flat-playlist --extractor-args youtubetab:approximate_date --playlist-end "$NO_OF_SEARCH_RESULTS" "${PREFERRED_BROWSER_OPTS[@]}" 2>/dev/null)
+      if ! echo "$fresh_result" | jq -e '.entries | length > 0' >/dev/null 2>&1; then
+        [ -n "$YT_X_DEBUG" ] && echo "[DEBUG] Live updater: fetch failed or empty, retrying in ${fetch_interval}s" >&2
+        local w="$fetch_interval"
+        while [ "$w" -gt 0 ] && [ -f "$CLI_CACHE_DIR/feed_live_updater.pid" ]; do sleep 3; w=$((w - 3)); done
+        continue
+      fi
       local current_page
       current_page=$(cat "$page_file" 2>/dev/null) || current_page=1
-      # Check for extend results
-      local bg_result
-      if bg_result=$(check_bg_feed_extend_result 2>/dev/null); then
-        [ -n "$YT_X_DEBUG" ] && echo "[DEBUG] Live updater: extend completed, merging" >&2
-        local current_data old_count
-        current_data=$(read_file_locked "$data_file") || continue
-        old_count=$(echo "$current_data" | jq '.entries | length')
-        local merged new_count
-        merged=$(merge_feed_entries "$current_data" "$bg_result")
-        new_count=$(echo "$merged" | jq '.entries | length')
-        rm -f "$CLI_CACHE_DIR/feed_bg_extend_result.json" "$CLI_CACHE_DIR/feed_bg_extend.pid"
-        if [ "$new_count" -gt "$old_count" ]; then
-          write_file_locked "$merged" "$data_file"
-          save_feed_cache "$merged"
-          # Generate text previews for new entries (background)
-          local new_entries_json
-          new_entries_json=$(echo "$merged" | jq --argjson start "$old_count" '
-            .entries = (.entries[$start:]
-            | to_entries
-            | map(.value.title="\(.key+1+$start|tostring| if (.|length) < 2 then "0" + . else . end) "+.value.title)
-            | map(.value))
-          ')
-          search_results="$new_entries_json"
-          generate_text_preview "$new_entries_json" 2>/dev/null &
-          if [ "$ENABLE_PREVIEW" = "true" ] && [ "$PREFERRED_SELECTOR" = "fzf" ]; then
-            local new_raw_json
-            new_raw_json=$(echo "$merged" | jq --argjson start "$old_count" '.entries = .entries[$start:]')
-            download_preview_images "$new_raw_json" 2>/dev/null &
-          fi
-          # Rebuild fzf input for current page and reload
-          build_homepage_fzf_input "$data_file" "$titles_file" "$current_page"
-          curl -s "localhost:$fzf_port" -d "reload(cat $titles_file)" 2>/dev/null
-          [ -n "$YT_X_DEBUG" ] && echo "[DEBUG] Live updater: reloaded fzf ($old_count -> $new_count)" >&2
-          # Start next extend fetch
-          local next_count=$((new_count + NO_OF_SEARCH_RESULTS))
-          start_bg_feed_extend "$url" "$next_count"
+      local current_data old_count
+      current_data=$(read_file_locked "$data_file") || continue
+      old_count=$(echo "$current_data" | jq '.entries | length')
+      local merged new_count
+      merged=$(merge_feed_entries "$current_data" "$fresh_result")
+      new_count=$(echo "$merged" | jq '.entries | length')
+      if [ "$new_count" -gt "$old_count" ]; then
+        empty_streak=0
+        fetch_interval=60
+        write_file_locked "$merged" "$data_file"
+        save_feed_cache "$merged"
+        # New entries are prepended, so the current page is renumbered — regenerate its text previews
+        local page_start=$(( (current_page - 1) * FEED_PAGE_SIZE ))
+        local page_json
+        page_json=$(echo "$merged" | jq --argjson start "$page_start" --argjson count "$FEED_PAGE_SIZE" '
+          .entries = (.entries[$start:$start + $count]
+          | to_entries
+          | map(.value.title="\(.key+1+$start|tostring| if (.|length) < 2 then "0" + . else . end) "+.value.title)
+          | map(.value))
+        ')
+        search_results="$page_json"
+        generate_text_preview "$page_json" 2>/dev/null &
+        if [ "$ENABLE_PREVIEW" = "true" ] && [ "$PREFERRED_SELECTOR" = "fzf" ]; then
+          local new_raw_json
+          new_raw_json=$(echo "$merged" | jq --argjson n "$((new_count - old_count))" '.entries = .entries[:$n]')
+          download_preview_images "$new_raw_json" 2>/dev/null &
+        fi
+        # Rebuild fzf input for current page and reload
+        build_homepage_fzf_input "$data_file" "$titles_file" "$current_page"
+        local total_pages=$(( (new_count + FEED_PAGE_SIZE - 1) / FEED_PAGE_SIZE ))
+        [ "$total_pages" -lt 1 ] && total_pages=1
+        curl -s "localhost:$fzf_port" -d "reload(cat $titles_file)+change-prompt(Feed [$current_page/$total_pages]: )" 2>/dev/null
+        [ -n "$YT_X_DEBUG" ] && echo "[DEBUG] Live updater: reloaded fzf ($old_count -> $new_count, pages=$total_pages)" >&2
+      else
+        empty_streak=$((empty_streak + 1))
+        # Back off: 90s after first miss, 120s, then 180s
+        if [ "$empty_streak" -le 2 ]; then
+          fetch_interval=90
+        elif [ "$empty_streak" -le 4 ]; then
+          fetch_interval=120
         else
-          feed_no_more=1
-          [ -n "$YT_X_DEBUG" ] && echo "[DEBUG] Live updater: no new entries from extend" >&2
+          fetch_interval=180
+        fi
+        [ -n "$YT_X_DEBUG" ] && echo "[DEBUG] Live updater: no new entries (streak=$empty_streak/$max_empty_streak), retry in ${fetch_interval}s" >&2
+        if [ "$empty_streak" -ge "$max_empty_streak" ]; then
+          [ -n "$YT_X_DEBUG" ] && echo "[DEBUG] Live updater: stopping after $max_empty_streak consecutive empty fetches" >&2
+          break
         fi
       fi
+      # Sleep in 3s increments so we can exit promptly when pid file is removed
+      local w="$fetch_interval"
+      while [ "$w" -gt 0 ] && [ -f "$CLI_CACHE_DIR/feed_live_updater.pid" ]; do sleep 3; w=$((w - 3)); done
     done
   ) &
   echo "$!" > "$CLI_CACHE_DIR/feed_live_updater.pid"
@@ -1001,23 +974,32 @@ update_script() {
     fi
   fi
 
-  update=$(curl -s "https://raw.githubusercontent.com/jkpair/yt-x-plus/refs/heads/master/yt-x" || byebye 1)
-  update="$(printf '%s\n' "$update" | diff -u "$yt_x_path" - 2>/dev/null)"
-  if [ -z "$update" ]; then
+  # Download to a temp file and validate before replacing the installed script
+  local tmp_file
+  tmp_file=$(mktemp) || byebye 1
+  if ! curl -fsSL "https://raw.githubusercontent.com/jkpair/yt-x-plus/refs/heads/master/yt-x" -o "$tmp_file" ||
+    ! grep -q '^CLI_VERSION=' "$tmp_file" || ! bash -n "$tmp_file" 2>/dev/null; then
+    rm -f "$tmp_file"
+    send_notification "Download failed or invalid script, not updating"
+    exec "$yt_x_path"
+    return 1
+  fi
+  if cmp -s "$tmp_file" "$yt_x_path"; then
+    rm -f "$tmp_file"
     send_notification "Script is up to date :)"
+  elif cat "$tmp_file" >"$yt_x_path"; then
+    rm -f "$tmp_file"
+    send_notification "Script has been updated!"
   else
-    if printf '%s\n' "$update" | patch "$yt_x_path" -; then
-      send_notification "Script has been updated!"
-    else
-      send_notification "Can't update for some reason!"
-    fi
+    rm -f "$tmp_file"
+    send_notification "Can't update for some reason!"
   fi
   exec "$yt_x_path"
 }
 
 check_update() {
   local remote_script remote_version
-  remote_script=$(curl -s "https://raw.githubusercontent.com/jkpair/yt-x-plus/refs/heads/master/yt-x" || return 1)
+  remote_script=$(curl -fsSL "https://raw.githubusercontent.com/jkpair/yt-x-plus/refs/heads/master/yt-x") || remote_script=""
   remote_version=$(printf '%s\n' "$remote_script" | grep -m1 '^CLI_VERSION=' | sed 's/CLI_VERSION="//;s/"//')
 
   if [ -z "$remote_version" ]; then
@@ -1025,7 +1007,9 @@ check_update() {
     return 1
   fi
 
-  if [ "$remote_version" = "$CLI_VERSION" ]; then
+  # Only offer an update when the remote version is strictly newer
+  if [ "$remote_version" = "$CLI_VERSION" ] ||
+    [ "$(printf '%s\n%s\n' "$remote_version" "$CLI_VERSION" | sort -V | tail -n1)" = "$CLI_VERSION" ]; then
     send_notification "You're on the latest version (v$CLI_VERSION)"
     return 0
   fi
@@ -1805,11 +1789,9 @@ welcome() {
 cleanup() {
   # Kill any background feed fetch
   kill_bg_feed_fetch
-  kill_bg_feed_extend
   stop_feed_live_updater
   rm -f "$CLI_CACHE_DIR/feed_bg_result.json" 2>/dev/null
-  rm -f "$CLI_CACHE_DIR/feed_bg_extend_result.json" 2>/dev/null
-  rm -f "$CLI_CACHE_DIR/feed_live_data.json" "$CLI_CACHE_DIR/feed_live_titles.txt" "$CLI_CACHE_DIR/feed_live_no_more" 2>/dev/null
+  rm -f "$CLI_CACHE_DIR/feed_live_data.json" "$CLI_CACHE_DIR/feed_live_titles.txt" 2>/dev/null
 
   # Remove any lock files we created
   rm -f "$CLI_CONFIG_DIR"/*.lock 2>/dev/null
@@ -2811,7 +2793,6 @@ playlist_explorer() {
   local feed_all_results=""
   local is_feed=0
   local is_homepage=0
-  local feed_no_more=0
   is_youtube_feed "$url" && is_feed=1
   [ "$url" = "https://www.youtube.com" ] && is_homepage=1
   [ "$is_feed" = 1 ] && feed_all_results="$search_results"
@@ -2828,24 +2809,6 @@ playlist_explorer() {
         save_feed_cache "$bg_result"
         rm -f "$CLI_CACHE_DIR/feed_bg_result.json" "$CLI_CACHE_DIR/feed_bg.pid"
         feed_page=1
-        DOWNLOAD_IMAGES=0
-      fi
-      # Check for background extend fetch results
-      local bg_extend_result
-      if bg_extend_result=$(check_bg_feed_extend_result); then
-        [ -n "$YT_X_DEBUG" ] && echo "[DEBUG] Background feed extend completed, merging entries" >&2
-        local old_count
-        old_count=$(echo "$feed_all_results" | jq '.entries | length')
-        feed_all_results=$(merge_feed_entries "$feed_all_results" "$bg_extend_result")
-        local new_count
-        new_count=$(echo "$feed_all_results" | jq '.entries | length')
-        [ -n "$YT_X_DEBUG" ] && echo "[DEBUG] Extend merge: $old_count -> $new_count entries" >&2
-        if [ "$new_count" -le "$old_count" ]; then
-          feed_no_more=1
-          [ -n "$YT_X_DEBUG" ] && echo "[DEBUG] No new unique entries from extend, setting feed_no_more=1" >&2
-        fi
-        save_feed_cache "$feed_all_results"
-        rm -f "$CLI_CACHE_DIR/feed_bg_extend_result.json" "$CLI_CACHE_DIR/feed_bg_extend.pid"
         DOWNLOAD_IMAGES=0
       fi
     fi
@@ -2927,11 +2890,6 @@ playlist_explorer() {
       write_file_locked "$feed_all_results" "$_live_data_file"
       echo "$feed_page" > "$_live_page_file"
       build_homepage_fzf_input "$_live_data_file" "$_live_titles_file" "$feed_page"
-      # Start background extend fetch so the live updater can auto-append new content
-      if ! is_bg_feed_extend_running && [ ! -f "$CLI_CACHE_DIR/feed_bg_extend_result.json" ]; then
-        local _extend_count=$(( $(echo "$feed_all_results" | jq '.entries | length') + NO_OF_SEARCH_RESULTS ))
-        start_bg_feed_extend "$url" "$_extend_count"
-      fi
       if [ "$FZF_HAS_LISTEN" = 1 ]; then
         _fzf_listen_opts=(--listen "$_fzf_listen_port")
         start_feed_live_updater "$_live_data_file" "$_live_titles_file" "$_fzf_listen_port" "$url" "$_live_page_file"
@@ -3022,38 +2980,21 @@ playlist_explorer() {
     case "$title" in
     Reload)
       if [ "$is_homepage" = 1 ]; then
-        # Wipe and re-fetch fresh content
-        kill_bg_feed_extend
         echo "Reloading feed..." >&2
         local reload_result
         reload_result=$(run_yt_dlp "$url" "$NO_OF_SEARCH_RESULTS" 2>/dev/null)
         if validate_json_response "$reload_result" "feed reload" 2>/dev/null; then
-          local old_count
-          old_count=$(echo "$feed_all_results" | jq '.entries | length')
           local new_count
           new_count=$(echo "$reload_result" | jq '.entries | length')
-          # Merge: keeps existing entries, appends any new ones at the end
-          local merged
-          merged=$(merge_feed_entries "$feed_all_results" "$reload_result")
-          local merged_count
-          merged_count=$(echo "$merged" | jq '.entries | length')
-          if [ "$merged_count" -gt "$old_count" ]; then
-            feed_all_results="$merged"
+          if [ "$new_count" -gt 0 ]; then
+            feed_all_results="$reload_result"
             save_feed_cache "$feed_all_results"
-            send_notification "$((merged_count - old_count)) new videos added"
-          elif [ "$new_count" -gt 0 ]; then
-            # No new unique content but reload succeeded — keep existing feed
-            send_notification "Feed up to date"
+            send_notification "Feed reloaded ($new_count videos)"
           else
-            # Reload returned empty results (fetch likely failed) — keep existing feed
             send_notification "Reload returned no results, keeping current feed"
           fi
           feed_page=1
           DOWNLOAD_IMAGES=0
-          # Start extend cycle
-          local next_fetch_count
-          next_fetch_count=$(( $(echo "$feed_all_results" | jq '.entries | length') + NO_OF_SEARCH_RESULTS ))
-          start_bg_feed_extend "$url" "$next_fetch_count"
         else
           send_notification "Reload failed, keeping current feed"
         fi
@@ -3117,23 +3058,15 @@ playlist_explorer() {
       continue
       ;;
     "Main Menu")
-      [ "$is_homepage" = 1 ] && kill_bg_feed_extend
       break
       ;;
     Back | "")
-      [ "$is_homepage" = 1 ] && kill_bg_feed_extend
       break
       ;;
     Exit)
       byebye
       ;;
     esac
-    # Auto-start background extend fetch for homepage when user selects a video
-    if [ "$is_homepage" = 1 ] && ! is_bg_feed_extend_running && [ ! -f "$CLI_CACHE_DIR/feed_bg_extend_result.json" ]; then
-      local auto_fetch_count
-      auto_fetch_count=$(( $(echo "$feed_all_results" | jq '.entries | length') + NO_OF_SEARCH_RESULTS ))
-      start_bg_feed_extend "$url" "$auto_fetch_count"
-    fi
     id=$(echo "$title" | sed -E 's/^([0-9]+) .*/\1/g')
     # Strip leading zeros to avoid octal interpretation (08, 09 would fail)
     id=$((10#$id))
