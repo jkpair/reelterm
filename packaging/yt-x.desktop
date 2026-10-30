@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=yt-x
+Comment=Browse, stream and download YouTube from the terminal
+Exec=yt-x
+Terminal=true
+Type=Application
+Icon=multimedia-video-player
+Categories=AudioVideo;Video;Player;
+Keywords=youtube;video;music;stream;download;
