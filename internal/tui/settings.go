@@ -231,7 +231,8 @@ func settingsAction(env *Env, action string) tea.Cmd {
 				return toastMsg{text: "Update check failed: " + err.Error(), err: true}
 			}
 			if selfupdate.Newer(latest, app.Version) {
-				return toastMsg{text: "Update available: " + latest + " (you have v" + app.Version + "). Run: " + env.Paths.Name + " --update"}
+				q := "Update to " + latest + " now? (you have v" + app.Version + ")"
+				return push(NewConfirm(env, q, func() tea.Cmd { return push(newUpdater(env, latest)) }))()
 			}
 			return toastMsg{text: "You are on the latest version (v" + app.Version + ")"}
 		}
@@ -338,5 +339,23 @@ func NewBrowserPicker(env *Env, question string) *Menu {
 			env.YT.Browser = b
 			return toastMsg{text: "Cookie extraction from " + b + " works!"}
 		})
+	})
+}
+
+// newUpdater downloads the release and replaces the running binary, like --update.
+func newUpdater(env *Env, latest string) *Loader {
+	return NewLoader(env, "Downloading "+latest+"…", func(ctx context.Context) (Screen, error) {
+		tag, err := selfupdate.Update(ctx, app.Repo, env.Paths.Name, app.Version)
+		if err != nil {
+			return nil, fmt.Errorf("update failed: %w", err)
+		}
+		if tag == "" {
+			return NewMessage(env, "Up to date", "You are on the latest version (v"+app.Version+")."), nil
+		}
+		body := "Updated to " + tag + ". Restart " + env.Paths.Name + " to use the new version."
+		if _, link, ok := selfupdate.LegacyInstall(app.LegacyName, env.Paths.Name); ok && link != "" {
+			body += "\n\nAlso linked " + link + " to the new name."
+		}
+		return NewMessage(env, "Update installed", body), nil
 	})
 }
