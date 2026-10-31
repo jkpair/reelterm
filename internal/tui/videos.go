@@ -80,6 +80,8 @@ type VideoList struct {
 	// alwaysMarked sends enter to onMarked even with nothing marked.
 	alwaysMarked bool
 	itemKind     string // "video", "channel", "playlist" or "file"
+	descScroll   int    // first description line shown in the preview pane
+	paneW        int
 	w, h         int
 }
 
@@ -221,6 +223,7 @@ func (l *VideoList) afterLoad() tea.Cmd {
 }
 
 func (l *VideoList) selectionChanged() tea.Cmd {
+	l.descScroll = 0
 	e, ok := l.Selected()
 	if !ok {
 		return nil
@@ -274,6 +277,9 @@ func (l *VideoList) Help() string {
 	if len(l.marked) > 0 {
 		return hints(l.env, "enter", fmt.Sprintf("act on %d marked", len(l.marked)), "tab", "mark", "esc", "clear marks")
 	}
+	if l.env.Cfg.EnablePreview {
+		return hints(l.env, "enter", "actions", "tab", "mark", "^r", "reload", "^d", "download", "^o", "browser", "⇧↑↓", "scroll info", "esc", "back")
+	}
 	return hints(l.env, "enter", "actions", "tab", "mark", "^r", "reload", "^d", "download", "^o", "browser", "esc", "back")
 }
 
@@ -318,6 +324,16 @@ func (l *VideoList) Update(msg tea.Msg) (Screen, tea.Cmd) {
 	case tea.KeyMsg:
 		return l, l.handleKey(msg)
 	case tea.MouseMsg:
+		// The wheel over the preview pane scrolls the description.
+		if l.paneW > 0 && msg.X < l.paneW {
+			switch msg.Button {
+			case tea.MouseButtonWheelUp:
+				l.descScroll = max(l.descScroll-3, 0)
+			case tea.MouseButtonWheelDown:
+				l.descScroll += 3 // clamped in previewLines
+			}
+			return l, nil
+		}
 		switch msg.Button {
 		case tea.MouseButtonWheelUp:
 			return l, l.move(-1)
@@ -415,6 +431,10 @@ func (l *VideoList) handleKey(k tea.KeyMsg) tea.Cmd {
 		return l.move(-listH)
 	case "pgdown", "shift+right":
 		return l.move(listH)
+	case "shift+up":
+		l.descScroll = max(l.descScroll-1, 0)
+	case "shift+down":
+		l.descScroll++ // clamped in previewLines
 	case "home":
 		return l.move(-len(l.visible))
 	case "end":
@@ -553,6 +573,7 @@ func (l *VideoList) View(w, h int) string {
 	if paneW > 0 {
 		listW = w - paneW - 2 // gap + free last column
 	}
+	l.paneW = paneW
 	var pane []string
 	if paneW > 0 {
 		pane = l.previewLines(paneW, bodyH)
@@ -737,10 +758,19 @@ func (l *VideoList) previewLines(w, h int) []string {
 			add(s.StatusStyle(st).UnsetBold().Render("  This video cannot be played."))
 		}
 	}
+	// The description scrolls below the fixed header (title and fields).
 	if d := strings.TrimSpace(e.Desc()); d != "" {
+		desc := strings.Split(wrap(d, iw-1), "\n")
+		avail := h - 1 - len(lines) - len(t) - 2 // blank line + rule
+		l.descScroll = max(min(l.descScroll, len(desc)-avail), 0)
+		rule := strings.Repeat("─", iw)
+		if len(desc) > avail && avail > 0 {
+			pos := fmt.Sprintf(" %d/%d ", min(l.descScroll+avail, len(desc)), len(desc))
+			rule = strings.Repeat("─", max(iw-cells(pos)-1, 0)) + pos + "─"
+		}
 		add("")
-		add(s.SectionRule.Render(strings.Repeat("─", iw)))
-		for _, dl := range strings.Split(wrap(d, iw-1), "\n") {
+		add(s.SectionRule.Render(rule))
+		for _, dl := range desc[l.descScroll:] {
 			add(" " + s.Fg.Render(dl))
 		}
 	}
