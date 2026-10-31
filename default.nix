@@ -9,7 +9,7 @@
 }:
 buildGoModule {
   pname = "reelterm";
-  version = "1.2.0";
+  version = "1.2.1";
   src = lib.cleanSource ./.;
 
   # After changing go.mod/go.sum, set this to lib.fakeHash, run `nix build`,
