@@ -36,6 +36,9 @@ type Source struct {
 	Kind      ListKind
 	Entries   []ytdlp.Entry
 	Args      []string // custom yt-dlp command instead of URL
+	// Load replaces yt-dlp entirely; fresh is set on ctrl+r to bypass caches.
+	// A non-empty note is shown as a toast after a successful load.
+	Load func(ctx context.Context, fresh bool) (pl *ytdlp.Playlist, note string, err error)
 }
 
 type (
@@ -45,6 +48,7 @@ type (
 		err    error
 		more   bool
 		silent bool
+		note   string
 	}
 	enrichedMsg struct {
 		key  string
@@ -81,6 +85,7 @@ type VideoList struct {
 	alwaysMarked bool
 	itemKind     string // "video", "channel", "playlist" or "file"
 	descScroll   int    // first description line shown in the preview pane
+	reload       bool   // the next fetch was asked for with ctrl+r
 	paneW        int
 	w, h         int
 }
@@ -126,18 +131,22 @@ func (l *VideoList) startLoading() tea.Cmd {
 
 // fetch loads entries in the background.
 func (l *VideoList) fetch(r ytdlp.Range, more, silent bool) tea.Cmd {
-	env, src := l.env, l.src
+	env, src, fresh := l.env, l.src, l.reload
+	l.reload = false
 	return func() tea.Msg {
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 		defer cancel()
 		var pl *ytdlp.Playlist
+		var note string
 		var err error
-		if len(src.Args) > 0 {
+		if src.Load != nil {
+			pl, note, err = src.Load(ctx, fresh)
+		} else if len(src.Args) > 0 {
 			pl, err = env.YT.FetchArgs(ctx, src.Args)
 		} else {
 			pl, err = env.YT.Fetch(ctx, src.URL, r)
 		}
-		return listLoadedMsg{list: l, pl: pl, err: err, more: more, silent: silent}
+		return listLoadedMsg{list: l, pl: pl, err: err, more: more, silent: silent, note: note}
 	}
 }
 
@@ -259,7 +268,7 @@ func (l *VideoList) enrich(e ytdlp.Entry) tea.Cmd {
 }
 
 func (l *VideoList) maybeLoadMore() tea.Cmd {
-	if l.src.Kind == KindStatic || len(l.src.Args) > 0 || l.loading || l.more || l.exhausted || l.filter != "" {
+	if l.src.Kind == KindStatic || len(l.src.Args) > 0 || l.src.Load != nil || l.loading || l.more || l.exhausted || l.filter != "" {
 		return nil
 	}
 	if l.cursor < len(l.visible)-5 {
@@ -404,6 +413,9 @@ func (l *VideoList) handleLoaded(msg listLoadedMsg) tea.Cmd {
 	if l.src.Kind == KindHome {
 		_ = l.env.Store.SaveFeed(&ytdlp.Playlist{Entries: l.entries})
 	}
+	if msg.note != "" {
+		return tea.Batch(l.afterLoad(), toast(msg.note))
+	}
 	return l.afterLoad()
 }
 
@@ -484,7 +496,7 @@ func (l *VideoList) handleKey(k tea.KeyMsg) tea.Cmd {
 		if l.src.Kind == KindStatic {
 			return nil
 		}
-		l.exhausted = false
+		l.exhausted, l.reload = false, true
 		return tea.Batch(l.startLoading(), l.fetch(ytdlp.Range{End: l.pageSize()}, false, false))
 	case "ctrl+d":
 		if l.itemKind == "video" {

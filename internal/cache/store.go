@@ -235,6 +235,43 @@ func (s *Store) Subscribe(ch ytdlp.Entry) error {
 	return s.saveEntries(s.subsPath(), upsert(list, ch))
 }
 
+// SetChannelIDs records channel IDs looked up for subscriptions, keyed by entry key.
+func (s *Store) SetChannelIDs(ids map[string]string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	list, _ := s.Subscriptions()
+	for i := range list {
+		if id, ok := ids[list[i].Key()]; ok {
+			list[i].ChannelID = id
+		}
+	}
+	return s.saveEntries(s.subsPath(), list)
+}
+
+// --- Channel RSS feeds ---
+
+func (s *Store) rssPath(channelID string) string {
+	return filepath.Join(s.P.CacheDir, "rss_"+channelID+".json")
+}
+
+// ChannelFeed returns a channel's cached feed entries and when they were fetched.
+func (s *Store) ChannelFeed(channelID string) ([]ytdlp.Entry, time.Time, bool) {
+	p := s.rssPath(channelID)
+	st, err := os.Stat(p)
+	if err != nil {
+		return nil, time.Time{}, false
+	}
+	var f entryFile
+	if err := readJSON(p, &f); err != nil {
+		return nil, time.Time{}, false
+	}
+	return f.Entries, st.ModTime(), true
+}
+
+func (s *Store) SaveChannelFeed(channelID string, e []ytdlp.Entry) error {
+	return s.saveEntries(s.rssPath(channelID), e)
+}
+
 // --- Search history ---
 
 // History returns search terms, newest first.

@@ -150,7 +150,7 @@ var defaultIcons = map[string]string{
 	"subscription": "\U000F0D40", "channel": "\U000F0448", "custom": "\uF0CA", "clips": "\uF03D",
 	"settings": "\uF013", "config": "\uF044", "exit": "\U000F0206", "play": "\uF04B",
 	"download": "\uF019", "audio": "\uF001", "back": "\U000F030D", "menu": "\U000F035C",
-	"next": "\uF061", "previous": "\uF060", "reload": "\uF021",
+	"next": "\uF061", "previous": "\uF060", "reload": "\uF021", "rss": "\U000F046B",
 }
 
 // ResetTerminalColors restores the terminal's own default colors (OSC 110/111).

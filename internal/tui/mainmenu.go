@@ -20,6 +20,7 @@ var mainDescs = map[string]string{
 	"Watch History":     "Your YouTube watch history",
 	"Recent":            "Recently played videos",
 	"Subscription Feed": "Latest videos from your subscribed channels",
+	"Channel Feed":      "Latest videos from your local channels (no sign-in needed)",
 	"Channels":          "Browse and manage your subscribed channels",
 	"Custom Playlists":  "User-created custom playlists",
 	"Clips":             "Browse your YouTube clips",
@@ -46,6 +47,7 @@ func NewMainMenu(env *Env) *Menu {
 			{Icon: ic("recent"), IconColor: t.Blue, Label: "Recent"},
 			section("Subscriptions"),
 			{Icon: ic("subscription"), IconColor: t.Magenta, Label: "Subscription Feed"},
+			{Icon: ic("rss"), IconColor: t.Magenta, Label: "Channel Feed"},
 			{Icon: ic("channel"), IconColor: t.Magenta, Label: "Channels"},
 			section("Custom"),
 			{Icon: ic("custom"), IconColor: t.Orange, Label: "Custom Playlists"},
@@ -94,7 +96,12 @@ func mainAction(env *Env, it Item) tea.Cmd {
 			return replace(searchList(env, q))
 		}))
 	case "Subscription Feed":
+		if !env.YT.HasCookies() {
+			return push(NewChannelFeed(env))
+		}
 		return listOf(env, "Subscriptions", youtube.Subscriptions, KindFeed)
+	case "Channel Feed":
+		return push(NewChannelFeed(env))
 	case "Playlists":
 		return push(NewPlaylistList(env, "Playlists", youtube.Playlists, 0))
 	case "Saved Videos":

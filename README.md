@@ -128,6 +128,8 @@ on Windows).
   `:newest`.
 - **Channels:** videos, shorts, streams, podcasts, playlists, featured and
   in-channel search. Keep a local channel list or import your subscriptions.
+- **Channel Feed:** the latest uploads from your local channels, merged and
+  cached, without signing in (RSS, with yt-dlp as a fallback).
 - **Thumbnails** in a preview pane, drawn with the best protocol your terminal
   supports:
   - Kitty graphics: kitty, Ghostty
