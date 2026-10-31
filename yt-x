@@ -6,7 +6,7 @@
 # downloads this file and runs it, and it swaps itself for the binary of the
 # latest release (keeping the yt-x file name, so the command still works).
 # To install fresh, use install.sh from the releases page.
-CLI_VERSION="1.1.1"
+CLI_VERSION="1.2.0"
 
 set -eu
 repo="jkpair/reelterm"
