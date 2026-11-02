@@ -43,7 +43,7 @@ SEARCH_HISTORY: {{.SearchHistory}}
 # the number of recent videos to keep
 NO_OF_RECENT: {{.NoOfRecent}}
 
-# the player to use for streaming [mpv/vlc]
+# the player to use for streaming [mpv/vlc], or the full path of a player
 PLAYER: {{.Player}}
 
 # the browser to use to extract cookies from

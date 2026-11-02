@@ -8,7 +8,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
@@ -17,6 +16,7 @@ import (
 
 	"github.com/jkpair/reelterm/internal/app"
 	"github.com/jkpair/reelterm/internal/config"
+	"github.com/jkpair/reelterm/internal/winget"
 	"github.com/jkpair/reelterm/internal/ytdlp"
 )
 
@@ -38,15 +38,42 @@ type Player struct {
 
 func New(cfg *config.Config, yt *ytdlp.Client) *Player { return &Player{Cfg: cfg, YT: yt} }
 
-// MpvBin returns mpv or mpv.exe, whichever exists.
+// MpvBin returns the full path of mpv (also where winget put it on
+// Windows), or "mpv" when it can't be found.
 func MpvBin() string {
-	if _, err := exec.LookPath("mpv"); err == nil {
-		return "mpv"
-	}
-	if _, err := exec.LookPath("mpv.exe"); err == nil {
-		return "mpv.exe"
+	if p := winget.Find("mpv", winget.Mpv); p != "" {
+		return p
 	}
 	return "mpv"
+}
+
+// Kind tells how to drive the PLAYER setting: "mpv", "vlc", or "other" for
+// the path of some other player, which gets a resolved stream URL. PLAYER
+// may be a name or the full path of mpv or vlc.
+func Kind(player string) string {
+	base := strings.ToLower(player[strings.LastIndexAny(player, `/\`)+1:])
+	switch strings.TrimSuffix(base, ".exe") {
+	case "mpv":
+		return "mpv"
+	case "vlc":
+		return "vlc"
+	}
+	if strings.ContainsAny(player, `/\`) {
+		return "other"
+	}
+	return "mpv"
+}
+
+// bin returns the program for PLAYER: its path if it is one, otherwise the
+// located default binary.
+func bin(player string) string {
+	if strings.ContainsAny(player, `/\`) {
+		return player
+	}
+	if Kind(player) == "vlc" {
+		return vlcBin()
+	}
+	return MpvBin()
 }
 
 // Command builds the command for req. Players other than mpv (and Android)
@@ -54,7 +81,8 @@ func MpvBin() string {
 func (p *Player) Command(ctx context.Context, req Request) (*exec.Cmd, error) {
 	url := req.URL
 	isFile := !strings.HasPrefix(url, "http")
-	if (p.Cfg.Player != "mpv" || app.Platform() == "android") && !isFile {
+	kind := Kind(p.Cfg.Player)
+	if (kind != "mpv" || app.Platform() == "android") && !isFile {
 		format := ""
 		if req.AudioOnly {
 			format = "bestaudio/best[height<=" + strconv.Itoa(p.Cfg.VideoQuality) + "]/best"
@@ -66,18 +94,21 @@ func (p *Player) Command(ctx context.Context, req Request) (*exec.Cmd, error) {
 		url = u
 	}
 	if app.Platform() == "android" {
-		if p.Cfg.Player == "vlc" {
+		if kind == "vlc" {
 			return exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url,
 				"-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity", "-e", "title", req.Title), nil
 		}
 		return exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity"), nil
 	}
-	if p.Cfg.Player == "vlc" {
+	switch kind {
+	case "vlc":
 		args := []string{url, "--video-title", req.Title}
 		if req.AudioOnly {
 			args = append(args, "--no-video")
 		}
-		return exec.Command(vlcBin(), args...), nil
+		return exec.Command(bin(p.Cfg.Player), args...), nil
+	case "other":
+		return exec.Command(p.Cfg.Player, url), nil
 	}
 	args := append([]string{}, p.YT.MpvOpts()...)
 	args = append(args, p.YT.BuildOpts(p.Cfg, ytdlp.ModeStream)...)
@@ -92,7 +123,7 @@ func (p *Player) Command(ctx context.Context, req Request) (*exec.Cmd, error) {
 	if req.AudioOnly {
 		args = append(args, "--no-video", "--force-window=no")
 	}
-	return exec.Command(MpvBin(), args...), nil
+	return exec.Command(bin(p.Cfg.Player), args...), nil
 }
 
 // mpvYtdlRaw folds yt-dlp style options (from BuildOpts) into mpv's
@@ -266,14 +297,8 @@ func comspec() string {
 
 // vlcBin finds vlc, including its default install folder on Windows.
 func vlcBin() string {
-	if _, err := exec.LookPath("vlc"); err == nil || runtime.GOOS != "windows" {
-		return "vlc"
-	}
-	for _, env := range []string{"ProgramFiles", "ProgramFiles(x86)"} {
-		p := filepath.Join(os.Getenv(env), "VideoLAN", "VLC", "vlc.exe")
-		if _, err := os.Stat(p); err == nil {
-			return p
-		}
+	if p := winget.Find("vlc", winget.VLC); p != "" {
+		return p
 	}
 	return "vlc"
 }

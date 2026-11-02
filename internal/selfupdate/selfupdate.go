@@ -155,6 +155,14 @@ func Update(ctx context.Context, repo, name, current string) (string, error) {
 	return r.TagName, nil
 }
 
+// oldExe is where a Windows update parks the running exe: reelterm.old.exe.
+func oldExe(exe string) string {
+	if strings.HasSuffix(strings.ToLower(exe), ".exe") {
+		exe = exe[:len(exe)-len(".exe")]
+	}
+	return exe + ".old.exe"
+}
+
 // replaceExe moves newPath over exe. On Windows a running .exe can't be
 // overwritten but can be renamed out of the way; CleanupOld removes it on
 // the next start.
@@ -162,7 +170,7 @@ func replaceExe(exe, newPath string) error {
 	if runtime.GOOS != "windows" {
 		return os.Rename(newPath, exe)
 	}
-	old := exe + ".old"
+	old := oldExe(exe)
 	_ = os.Remove(old)
 	if err := os.Rename(exe, old); err != nil {
 		return err
@@ -180,6 +188,7 @@ func CleanupOld() {
 		return
 	}
 	if exe, err := os.Executable(); err == nil {
-		_ = os.Remove(exe + ".old")
+		_ = os.Remove(oldExe(exe))
+		_ = os.Remove(exe + ".old") // left by 1.2.x
 	}
 }

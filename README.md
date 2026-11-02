@@ -44,24 +44,29 @@ sudo apk add --allow-untrusted ./reelterm_*_linux_amd64.apk
 Builds are available for `amd64`, `arm64` and `armv7` (e.g. Raspberry Pi).
 Plain binaries (`reelterm-linux-amd64`, …) and tarballs are attached too.
 
-### Windows (experimental)
+### Windows
 
-> [!WARNING]
-> The Windows build is **experimental**. It's built and its tests pass, but
-> it hasn't been tried on a real Windows machine yet. Bug reports are welcome.
+Download `reelterm-setup-windows-amd64.exe` from the
+[latest release](https://github.com/jkpair/reelterm/releases/latest) and run
+it. It installs reelterm for your user (no admin rights), installs yt-dlp,
+ffmpeg, mpv or VLC, Windows Terminal and JetBrainsMono Nerd Font with winget,
+adds reelterm to your `PATH`, and creates a Windows Terminal profile and
+Start menu shortcut. Uninstall it from Settings → Apps.
 
-Download `reelterm-windows-amd64.exe` from the
-[latest release](https://github.com/jkpair/reelterm/releases/latest), rename
-it to `reelterm.exe` and put it somewhere on your `PATH`. Use Windows Terminal with
-a Nerd Font.
+> [!NOTE]
+> The setup isn't code-signed yet, so SmartScreen may say "Windows protected
+> your PC". Click **More info**, then **Run anyway**.
 
-`reelterm --install` installs yt-dlp and ffmpeg with winget. Install
-[mpv](https://mpv.io/installation/) (or VLC) yourself. Config and cache live
-in `%APPDATA%\reelterm` and `%LOCALAPPDATA%\reelterm`.
+Setup options: `/S` (silent), `--no-deps`, `--player mpv|vlc|none|<path>`,
+`--no-desktop`, `--no-font`, `--uninstall [--purge]`.
 
-Thumbnails default to colour blocks on Windows. On Windows Terminal 1.22 or
-newer you can try real images with `IMAGE_RENDERER: sixel`, though they may
-be sized incorrectly.
+To install by hand instead, download `reelterm-windows-amd64.exe`, rename it
+to `reelterm.exe`, put it on your `PATH` and run `reelterm --install`, which
+installs yt-dlp, ffmpeg and mpv with winget. Config and cache live in
+`%APPDATA%\reelterm` and `%LOCALAPPDATA%\reelterm`.
+
+Thumbnails use sixel images in Windows Terminal (1.22 or newer) and colour
+blocks elsewhere; set `IMAGE_RENDERER` to override.
 
 ### Nix
 

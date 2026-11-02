@@ -32,3 +32,8 @@ repomix-output.xml
 /bin/
 /dist/
 /completions/
+
+# reelterm-setup build inputs (written by .goreleaser.yaml hooks / go generate)
+/cmd/reelterm-setup/payload/*
+!/cmd/reelterm-setup/payload/.keep
+/cmd/reelterm-setup/*.syso

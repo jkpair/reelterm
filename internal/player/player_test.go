@@ -53,3 +53,17 @@ func TestMpvCommand(t *testing.T) {
 		}
 	}
 }
+
+func TestKind(t *testing.T) {
+	for in, want := range map[string]string{
+		"mpv": "mpv", "vlc": "vlc", "": "mpv",
+		`C:\Program Files\VideoLAN\VLC\vlc.exe`: "vlc",
+		`C:\tools\MPV.EXE`:                      "mpv",
+		"/opt/mpv/mpv":                          "mpv",
+		`C:\Program Files\MPC-HC\mpc-hc64.exe`:  "other",
+	} {
+		if got := Kind(in); got != want {
+			t.Errorf("Kind(%q) = %q, want %q", in, got, want)
+		}
+	}
+}

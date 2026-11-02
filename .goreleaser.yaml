@@ -6,6 +6,11 @@ before:
     - go mod tidy
     - go test ./...
     - sh -c "mkdir -p completions && go run ./cmd/reelterm completions --bash > completions/reelterm.bash && go run ./cmd/reelterm completions --fish > completions/reelterm.fish && go run ./cmd/reelterm completions --zsh > completions/_reelterm"
+    # reelterm-setup.exe embeds the Windows reelterm.exe (same flags as the
+    # reelterm build) and a manifest that keeps Windows from asking for
+    # admin rights because "setup" is in its name.
+    - sh -c "CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags '-s -w -X github.com/jkpair/reelterm/internal/app.Version={{ .Version }}' -o cmd/reelterm-setup/payload/reelterm.exe ./cmd/reelterm"
+    - sh -c "cd cmd/reelterm-setup && go run github.com/tc-hib/go-winres@v0.3.3 make --in winres/winres.json --out rsrc --arch amd64 --product-version {{ .Version }} --file-version {{ .Version }}"
 
 builds:
   - id: reelterm
@@ -24,20 +29,34 @@ builds:
       - { goos: darwin, goarch: arm }
       - { goos: windows, goarch: arm }
       - { goos: windows, goarch: arm64 }
+  - id: setup
+    main: ./cmd/reelterm-setup
+    binary: reelterm-setup
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
+    goos: [windows]
+    goarch: [amd64]
 
 archives:
   # Raw binaries named reelterm-<os>-<arch>: what `reelterm --update`,
   # install.sh and the migration script download.
   - id: binary
+    ids: [reelterm]
     formats: [binary]
     name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
   # The same binaries under the pre-rename name, which `--update` in
   # yt-x 1.0.x looks for.
   - id: legacy-binary
+    ids: [reelterm]
     formats: [binary]
     name_template: "yt-x-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
   # Tarballs with docs, completions and the example plugin.
   - id: tarball
+    ids: [reelterm]
     formats: [tar.gz]
     format_overrides:
       - { goos: windows, formats: [zip] }
@@ -47,9 +66,15 @@ archives:
       - LICENSE
       - plugins/example.lua
       - completions/*
+  # reelterm-setup-windows-amd64.exe, the Windows installer.
+  - id: setup
+    ids: [setup]
+    formats: [binary]
+    name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}"
 
 nfpms:
   - id: packages
+    ids: [reelterm]
     package_name: reelterm
     file_name_template: "{{ .PackageName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
     vendor: jkpair

@@ -61,8 +61,12 @@ type options struct {
 }
 
 func main() {
+	if relaunchInTerminal() {
+		return
+	}
 	if err := run(); err != nil {
 		fmt.Fprintln(os.Stderr, "error:", err)
+		pauseOnError()
 		os.Exit(1)
 	}
 }
@@ -76,6 +80,11 @@ func run() error {
 	cfg, firstRun, err := config.Load(paths.ConfigFile)
 	if err != nil {
 		return err
+	}
+	// reelterm-setup creates the config to store the player choice and
+	// leaves this marker so the first-run screens still show.
+	if marker := filepath.Join(paths.CacheDir, ".first_run"); os.Remove(marker) == nil {
+		firstRun = true
 	}
 	opts, exit, err := parseArgs(os.Args[1:], cfg, paths)
 	if err != nil || exit {
@@ -347,7 +356,7 @@ Commandline options override the config
 Options:
   -S, --search <terms>          search for a video (supports :filters, e.g. ":week lofi")
   -e, --edit-config             edit the %[1]s config file
-  -p, --player <mpv|vlc>        set the video player
+  -p, --player <mpv|vlc|path>   set the video player (or the path of one)
   -x, --extension <plugin>      load a Lua plugin (name in %[2]s or full path)
   --preview / --no-preview      enable or disable thumbnails and the preview pane
   --theme <name>                set the color theme

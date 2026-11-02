@@ -18,3 +18,33 @@ jobs:
       # The root yt-x file must stay the Bash migration script that old
       # installs download; running it locally replaces it with a binary.
       - run: head -n1 yt-x | grep -qx '#!/usr/bin/env bash' && grep -q '^CLI_VERSION=' yt-x
+
+  # Installs with reelterm-setup.exe on a real Windows runner (no winget
+  # there, so no dependencies), then uninstalls again.
+  windows-setup:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build reelterm-setup.exe
+        shell: bash
+        run: |
+          go build -o cmd/reelterm-setup/payload/reelterm.exe ./cmd/reelterm
+          (cd cmd/reelterm-setup && go run github.com/tc-hib/go-winres@v0.3.3 make --in winres/winres.json --out rsrc --arch amd64)
+          go build -ldflags "-X main.version=0.0.0-ci" -o reelterm-setup.exe ./cmd/reelterm-setup
+      - name: Install
+        shell: pwsh
+        run: ./reelterm-setup.exe /S --no-deps --no-font
+      - name: Check the install from a fresh PATH
+        shell: pwsh
+        run: |
+          $env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [Environment]::GetEnvironmentVariable('Path', 'User')
+          if (-not (Test-Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\reelterm')) { throw 'Uninstall key missing' }
+          reelterm --version
+      - name: Uninstall
+        shell: pwsh
+        run: |
+          & "$env:LOCALAPPDATA\Programs\reelterm\reelterm-setup.exe" --uninstall /S
+          if (Test-Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\reelterm') { throw 'Uninstall key still there' }

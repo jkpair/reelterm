@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/jkpair/reelterm/internal/winget"
 )
 
 // Dep is one external program.
@@ -19,32 +21,52 @@ type Dep struct {
 	Required bool
 	Purpose  string
 	Pkg      map[string]string // package manager -> package name (default: Name)
+	Unix     bool              // not used on Windows
 }
 
 var All = []Dep{
-	{Name: "yt-dlp", Bins: []string{"yt-dlp"}, Required: true, Purpose: "fetching YouTube data and streams", Pkg: map[string]string{"winget": "yt-dlp.yt-dlp"}},
-	{Name: "mpv", Bins: []string{"mpv", "mpv.exe", "vlc"}, Required: true, Purpose: "playback (or vlc)", Pkg: map[string]string{"winget": ""}},
-	{Name: "ffmpeg", Bins: []string{"ffmpeg"}, Required: true, Purpose: "merging and converting downloads", Pkg: map[string]string{"winget": "Gyan.FFmpeg"}},
+	{Name: "yt-dlp", Bins: []string{"yt-dlp"}, Required: true, Purpose: "fetching YouTube data and streams", Pkg: map[string]string{"winget": winget.YtDlp}},
+	{Name: "mpv", Bins: []string{"mpv", "vlc"}, Required: true, Purpose: "playback (or vlc)", Pkg: map[string]string{"winget": winget.Mpv}},
+	{Name: "ffmpeg", Bins: []string{"ffmpeg"}, Required: true, Purpose: "merging and converting downloads", Pkg: map[string]string{"winget": winget.FFmpeg}},
 	{Name: "chafa", Bins: []string{"chafa"}, Purpose: "optional thumbnail renderer (IMAGE_RENDERER: chafa)", Pkg: map[string]string{"winget": ""}},
-	{Name: "libnotify", Bins: []string{"notify-send"}, Purpose: "desktop notifications", Pkg: map[string]string{"apt": "libnotify-bin", "brew": "", "winget": ""}},
+	{Name: "libnotify", Bins: []string{"notify-send"}, Purpose: "desktop notifications", Pkg: map[string]string{"apt": "libnotify-bin", "brew": ""}, Unix: true},
 	{Name: "clipboard", Bins: []string{"wl-copy", "xclip", "xsel", "pbcopy", "termux-clipboard-set", "clip"}, Purpose: "Copy Link",
 		Pkg: map[string]string{"pacman": "wl-clipboard", "apt": "wl-clipboard", "dnf": "wl-clipboard", "zypper": "wl-clipboard", "xbps": "wl-clipboard", "apk": "wl-clipboard", "brew": "", "winget": ""}},
 }
 
-// Found returns the first available binary for d, or "".
+// Found returns the first available binary for d, or "". On Windows it also
+// looks where winget installs programs that aren't on PATH yet.
 func (d Dep) Found() string {
 	for _, b := range d.Bins {
-		if p, err := exec.LookPath(b); err == nil {
+		ids := []string{d.Pkg["winget"]}
+		if b == "vlc" {
+			ids = []string{winget.VLC}
+		}
+		if p := winget.Find(b, ids...); p != "" {
 			return p
 		}
 	}
 	return ""
 }
 
+// platformDeps returns the dependencies that apply to this OS.
+func platformDeps() []Dep {
+	if runtime.GOOS != "windows" {
+		return All
+	}
+	var out []Dep
+	for _, d := range All {
+		if !d.Unix {
+			out = append(out, d)
+		}
+	}
+	return out
+}
+
 // Missing returns required (or all, if optional) dependencies not installed.
 func Missing(includeOptional bool) []Dep {
 	var out []Dep
-	for _, d := range All {
+	for _, d := range platformDeps() {
 		if (d.Required || includeOptional) && d.Found() == "" {
 			out = append(out, d)
 		}
@@ -56,13 +78,16 @@ func Missing(includeOptional bool) []Dep {
 func Report(w io.Writer) bool {
 	ok := true
 	fmt.Fprintln(w, "Dependencies:")
-	for _, d := range All {
+	for _, d := range platformDeps() {
 		p := d.Found()
 		mark, state := "✓", p
 		if p == "" {
 			mark, state = "·", "not found (optional)"
 			if d.Required {
 				mark, state, ok = "✗", "MISSING", false
+				if id := d.Pkg["winget"]; runtime.GOOS == "windows" && id != "" {
+					state += " (winget install " + id + ")"
+				}
 			}
 		}
 		fmt.Fprintf(w, "  %s %-10s %-34s %s\n", mark, d.Name, d.Purpose, state)
@@ -126,7 +151,7 @@ func Install(in io.Reader, out io.Writer, includeOptional bool) error {
 	var cmdlines []string
 	if m.name == "winget" {
 		for _, p := range pkgs {
-			cmdlines = append(cmdlines, m.install+" "+p)
+			cmdlines = append(cmdlines, "winget "+strings.Join(winget.InstallArgs(p, true), " "))
 		}
 	} else if len(pkgs) > 0 {
 		cmdlines = []string{m.install + " " + strings.Join(pkgs, " ")}
@@ -140,6 +165,17 @@ func Install(in io.Reader, out io.Writer, includeOptional bool) error {
 	if a := strings.ToLower(strings.TrimSpace(ans)); a != "y" && a != "yes" {
 		return fmt.Errorf("cancelled")
 	}
+	if m.name == "winget" {
+		for _, p := range pkgs {
+			if err := winget.Install(p, os.Stdout); err != nil {
+				return fmt.Errorf("winget install %s: %w", p, err)
+			}
+		}
+		// Pick up the new programs in this process, so --check-deps and
+		// startup pass without opening a new terminal.
+		winget.RefreshPath()
+		cmdlines = nil
+	}
 	for _, cl := range cmdlines {
 		f := strings.Fields(cl)
 		c := exec.Command(f[0], f[1:]...)
@@ -150,9 +186,6 @@ func Install(in io.Reader, out io.Writer, includeOptional bool) error {
 	}
 	if manual != "" {
 		fmt.Fprintf(out, "\nStill needed:\n%s\n", manual)
-	}
-	if m.name == "winget" {
-		fmt.Fprintln(out, "Open a new terminal so the newly installed programs are on your PATH.")
 	}
 	return nil
 }

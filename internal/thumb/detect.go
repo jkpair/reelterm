@@ -54,9 +54,11 @@ func Detect(setting string) Protocol {
 		return p
 	}
 	if runtime.GOOS == "windows" {
-		// Sixel needs Windows Terminal 1.22+ and the cell pixel size can't be
-		// read, so images could be mis-sized; half-blocks always work.
-		// IMAGE_RENDERER: sixel opts in.
+		// Windows Terminal (WT_SESSION) draws sixel since 1.22; the legacy
+		// console host only manages half-blocks.
+		if os.Getenv("WT_SESSION") != "" {
+			return Sixel
+		}
 		return HalfBlock
 	}
 	env := os.Getenv

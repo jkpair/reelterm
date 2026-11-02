@@ -18,3 +18,15 @@ func TestReplaceExe(t *testing.T) {
 		t.Fatalf("exe = %q", b)
 	}
 }
+
+func TestOldExe(t *testing.T) {
+	for in, want := range map[string]string{
+		`C:\x\reelterm.exe`: `C:\x\reelterm.old.exe`,
+		`C:\x\REELTERM.EXE`: `C:\x\REELTERM.old.exe`,
+		"/usr/bin/reelterm": "/usr/bin/reelterm.old.exe",
+	} {
+		if got := oldExe(in); got != want {
+			t.Errorf("oldExe(%q) = %q", in, got)
+		}
+	}
+}

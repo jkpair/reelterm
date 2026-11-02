@@ -259,7 +259,7 @@ func runPlayer(env *Env, req player.Request) tea.Cmd {
 	if req.AudioOnly {
 		verb = "Now listening to: "
 	}
-	if req.AudioOnly && env.Cfg.Player == "mpv" {
+	if req.AudioOnly && player.Kind(env.Cfg.Player) == "mpv" {
 		buf := player.Capture(cmd, os.Stderr)
 		return tea.Sequence(toast(verb+req.Title), tea.ExecProcess(cmd, func(err error) tea.Msg {
 			return playerExitMsg{title: req.Title, stderr: buf.String(), err: err}
